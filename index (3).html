@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petualangan Sains - Game Edukasi Biologi SMA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mario-red: #E52521;
+            --mario-blue: #43B047;
+            --sky-blue: #5C94FC;
+            --coin-gold: #FBD000;
+        }
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #1a202c;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .font-pixel {
+            font-family: 'Press Start 2P', cursive;
+        }
+        /* Retro Button Styling */
+        .btn-retro {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #000;
+            box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.25), 4px 4px 0px 0px #000;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+        .btn-retro:active {
+            transform: translate(2px, 2px);
+            box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.25), 2px 2px 0px 0px #000;
+        }
+        .panel-retro {
+            border: 4px solid #000;
+            box-shadow: 6px 6px 0px 0px rgba(0,0,0,0.8);
+        }
+        /* Touch Pad Styling */
+        .dpad-btn {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(4px);
+            border: 3px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            active: scale(0.92);
+        }
+        .dpad-btn:active, .dpad-btn.active {
+            background: rgba(251, 208, 0, 0.65);
+            border-color: #fff;
+            transform: scale(0.93);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: floatSlow 2.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen flex flex-col items-center justify-center">
+
+    <!-- MAIN CONTAINER -->
+    <div id="app" class="relative w-full max-w-5xl min-h-screen md:min-h-[650px] md:h-[92vh] bg-sky-400 md:rounded-2xl md:my-4 overflow-hidden shadow-2xl border-0 md:border-4 border-black flex flex-col">
+
+        <!-- TOP FLOATING BAR (Audio & Info) -->
+        <div class="bg-slate-900 text-white px-3 py-2 flex items-center justify-between border-b-4 border-black z-30 shrink-0">
+            <div class="flex items-center space-x-2">
+                <span class="text-xl">🍄</span>
+                <span class="font-pixel text-[10px] sm:text-xs text-yellow-400 tracking-wider">PETUALANGAN SAINS</span>
+                <span id="headerSubBadge" class="hidden sm:inline-block bg-emerald-600 text-[10px] px-2 py-0.5 rounded font-bold uppercase">Biologi SMA</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="btnToggleBgm" onclick="sound.toggleBGM()" class="px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-xs font-bold flex items-center space-x-1 border border-slate-500">
+                    <span id="bgmIcon">🎵</span>
+                    <span class="hidden sm:inline" id="bgmText">Musik: ON</span>
+                </button>
+                <button id="btnToggleSfx" onclick="sound.toggleSFX()" class="px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-xs font-bold flex items-center space-x-1 border border-slate-500">
+                    <span id="sfxIcon">🔊</span>
+                    <span class="hidden sm:inline" id="sfxText">SFX: ON</span>
+                </button>
+                <button id="btnHomeNav" onclick="app.confirmBackHome()" class="hidden px-2.5 py-1 rounded bg-red-600 hover:bg-red-500 text-xs font-bold border border-red-400">
+                    🏠 Menu
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 1: HOME & STUDENT LOGIN / CUSTOMIZE -->
+        <!-- ========================================== -->
+        <div id="screenHome" class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col justify-between relative" style="background: linear-gradient(180deg, #5C94FC 0%, #88b4fc 75%, #567d46 75%, #43B047 100%);">
+            
+            <!-- Decorative Clouds -->
+            <div class="absolute top-6 left-8 opacity-80 pointer-events-none text-5xl animate-float">☁️</div>
+            <div class="absolute top-14 right-12 opacity-80 pointer-events-none text-6xl animate-float" style="animation-delay: 1s;">☁️</div>
+
+            <div class="max-w-3xl mx-auto w-full z-10 my-auto">
+                <!-- Game Title Banner -->
+                <div class="text-center mb-5">
+                    <div class="inline-block bg-red-600 text-white px-4 py-1.5 rounded-t-xl border-4 border-b-0 border-black font-bold text-xs sm:text-sm tracking-widest uppercase shadow">
+                        Game Edukasi Platformer Interaktif
+                    </div>
+                    <div class="bg-amber-400 panel-retro p-4 sm:p-6 rounded-2xl relative">
+                        <h1 class="font-pixel text-xl sm:text-3xl md:text-4xl text-red-600 drop-shadow-[3px_3px_0px_#000] leading-tight">
+                            PETUALANGAN SAINS
+                        </h1>
+                        <p id="homeSubtitle" class="font-bold text-slate-900 mt-2 text-sm sm:text-base bg-amber-200 inline-block px-4 py-1 rounded-full border-2 border-black">
+                            Mata Pelajaran: Biologi | Materi: Ekosistem (Daur Biogeokimia)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Main Grid: Student Form & Level Info -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <!-- Left: Kustomisasi Identitas -->
+                    <div class="md:col-span-7 bg-white/95 panel-retro rounded-2xl p-4 sm:p-5">
+                        <div class="flex items-center justify-between border-b-2 border-slate-200 pb-2 mb-3">
+                            <h2 class="font-bold text-base sm:text-lg flex items-center gap-2 text-slate-800">
+                                <span>🎒</span> Identitas & Kustomisasi
+                            </h2>
+                            <span class="text-xs font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded border border-blue-300">Wajib Diisi</span>
+                        </div>
+
+                        <div class="space-y-2.5 text-xs sm:text-sm">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">🏫 Identitas Sekolah</label>
+                                    <input type="text" id="inputSchool" value="SMA Negeri 1 Sains Nusantara" class="w-full px-3 py-2 rounded-lg border-2 border-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">👩‍🏫 Nama Guru Pengampu</label>
+                                    <input type="text" id="inputTeacher" value="Ibu Siti Rahmawati, S.Pd., M.Si." class="w-full px-3 py-2 rounded-lg border-2 border-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">🧑‍🎓 Nama Siswa / Pemain</label>
+                                    <input type="text" id="inputStudent" placeholder="Ketik nama lengkapmu..." value="Budi Santoso" class="w-full px-3 py-2 rounded-lg border-2 border-slate-800 font-semibold bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block font-bold text-slate-700 mb-1">🎓 Jenjang</label>
+                                        <select id="inputLevel" class="w-full px-2 py-2 rounded-lg border-2 border-slate-800 font-semibold bg-white">
+                                            <option value="SMA">SMA / MA</option>
+                                            <option value="SMK">SMK</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-700 mb-1">🏷️ Kelas</label>
+                                        <select id="inputClass" class="w-full px-2 py-2 rounded-lg border-2 border-slate-800 font-semibold bg-white">
+                                            <option value="X-A">Kelas XA</option>
+                                            <option value="X-B">Kelas XB</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5 pt-1">
+                                <div class="bg-emerald-50 border-2 border-emerald-600 rounded-lg p-2">
+                                    <span class="text-[11px] font-bold text-emerald-800 block">📘 Mata Pelajaran</span>
+                                    <input type="text" id="inputSubject" value="Biologi" class="w-full bg-transparent font-bold text-slate-900 focus:outline-none text-xs sm:text-sm border-b border-emerald-400">
+                                </div>
+                                <div class="bg-amber-50 border-2 border-amber-600 rounded-lg p-2">
+                                    <span class="text-[11px] font-bold text-amber-800 block">🌿 Materi Pokok</span>
+                                    <input type="text" id="inputTopic" value="Ekosistem" class="w-full bg-transparent font-bold text-slate-900 focus:outline-none text-xs sm:text-sm border-b border-amber-400">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4 flex flex-col sm:flex-row gap-2.5">
+                            <button onclick="app.startGameFlow()" class="flex-1 btn-retro bg-green-500 hover:bg-green-400 text-white font-pixel text-xs sm:text-sm py-3.5 px-4 rounded-xl">
+                                ▶️ MULAI PETUALANGAN
+                            </button>
+                            <button onclick="app.openTeacherEditor()" class="btn-retro bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs sm:text-sm py-2.5 px-4 rounded-xl">
+                                ⚙️ Panel Guru (Edit Soal & Materi)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Sub-Materi & Aturan Main -->
+                    <div class="md:col-span-5 flex flex-col gap-3">
+                        <div class="bg-slate-900/95 text-white panel-retro rounded-2xl p-4 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-pixel text-xs text-yellow-400 mb-2.5 flex items-center gap-2">
+                                    <span>🗺️</span> 4 DUNIA SUB-MATERI (15 SOAL)
+                                </h3>
+                                <ul class="space-y-2 text-xs">
+                                    <li class="flex items-center justify-between bg-slate-800 p-2 rounded-lg border border-sky-500">
+                                        <span class="font-bold flex items-center gap-1.5">💧 Dunia 1: Siklus Air</span>
+                                        <span class="bg-sky-500 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px]">4 Soal</span>
+                                    </li>
+                                    <li class="flex items-center justify-between bg-slate-800 p-2 rounded-lg border border-emerald-500">
+                                        <span class="font-bold flex items-center gap-1.5">🌿 Dunia 2: Siklus Karbon</span>
+                                        <span class="bg-emerald-500 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px]">4 Soal</span>
+                                    </li>
+                                    <li class="flex items-center justify-between bg-slate-800 p-2 rounded-lg border border-purple-500">
+                                        <span class="font-bold flex items-center gap-1.5">⚡ Dunia 3: Siklus Nitrogen</span>
+                                        <span class="bg-purple-400 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px]">4 Soal</span>
+                                    </li>
+                                    <li class="flex items-center justify-between bg-slate-800 p-2 rounded-lg border border-amber-500">
+                                        <span class="font-bold flex items-center gap-1.5">🌋 Dunia 4: Siklus Sulfur (Belerang)</span>
+                                        <span class="bg-amber-400 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px]">3 Soal</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="mt-3 pt-2.5 border-t border-slate-700 text-[11px] text-slate-300 space-y-1">
+                                <p>🎯 <b>Cara Bermain:</b> Lari, lompat hindari musuh, kumpulkan <b>Koin (+10)</b>, <b>Buku Sains (+25)</b>, dan sundul <b>Blok Tanya [?]</b> untuk menjawab 15 soal!</p>
+                                <p>❤️ <b>Aturan:</b> Jawaban benar <b>+100 Poin</b>, jawaban salah mengurangi <b>-1 Nyawa</b>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 2: WORLD MAP / LEVEL SELECTOR       -->
+        <!-- ========================================== -->
+        <div id="screenMap" class="hidden flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-800 flex flex-col justify-between" style="background: radial-gradient(circle at center, #1e3a8a 0%, #0f172a 100%);">
+            <div class="max-w-4xl mx-auto w-full my-auto">
+                <div class="bg-amber-400 panel-retro rounded-2xl p-4 mb-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div>
+                        <span class="text-xs font-bold uppercase bg-black text-yellow-400 px-2.5 py-0.5 rounded">Peta Petualangan Ekosistem</span>
+                        <h2 class="font-pixel text-base sm:text-xl text-slate-900 mt-1">PILIH DUNIA / LEVEL PERMAINAN</h2>
+                    </div>
+                    <div class="flex items-center gap-3 bg-white px-3 py-2 rounded-xl border-2 border-black text-xs sm:text-sm font-bold">
+                        <div>👤 <span id="mapStudentName">Budi</span> (<span id="mapStudentClass">X-A</span>)</div>
+                        <div class="text-amber-600">⭐ Skor: <span id="mapTotalScore">0</span></div>
+                        <div class="text-emerald-600">📝 Soal: <span id="mapAnsweredCount">0</span>/15</div>
+                    </div>
+                </div>
+
+                <!-- 4 Worlds Grid -->
+                <div id="worldCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                    <!-- Populated via JS -->
+                </div>
+
+                <!-- Map Footer Actions -->
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 p-4 rounded-2xl border-2 border-slate-700 text-white">
+                    <div class="text-xs sm:text-sm">
+                        💡 <b>Tips:</b> Selesaikan semua Blok Soal <span class="text-yellow-400 font-bold">[?]</span> dan sentuh Tiang Bendera di ujung level!
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="app.showStudyModal(0)" class="btn-retro bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs px-3 py-2 rounded-xl">
+                            📖 Ringkasan Materi
+                        </button>
+                        <button onclick="app.showReportScreen()" class="btn-retro bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl">
+                            📊 Lihat Nilai & Laporan Hasil Belajar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 3: GAMEPLAY CANVAS & MOBILE CONTROLS-->
+        <!-- ========================================== -->
+        <div id="screenGame" class="hidden flex-1 relative flex flex-col bg-black overflow-hidden select-none">
+            
+            <!-- HUD Overlay -->
+            <div class="absolute top-2 left-2 right-2 z-20 flex flex-wrap items-center justify-between gap-1 pointer-events-none">
+                <!-- Left HUD: Lives & Player -->
+                <div class="bg-slate-900/85 backdrop-blur border-2 border-white/80 text-white px-3 py-1.5 rounded-xl flex items-center space-x-3 shadow-lg">
+                    <div class="flex items-center space-x-1" id="hudLives">
+                        ❤️❤️❤️
+                    </div>
+                    <div class="h-4 w-[2px] bg-slate-600"></div>
+                    <div class="text-xs font-bold text-yellow-300 flex items-center gap-1">
+                        <span>🪙</span> <span id="hudCoins">0</span>
+                    </div>
+                    <div class="text-xs font-bold text-cyan-300 flex items-center gap-1">
+                        <span>📘</span> <span id="hudBooks">0</span>
+                    </div>
+                </div>
+
+                <!-- Center HUD: World Title & Question Progress -->
+                <div class="bg-amber-400 border-2 border-black text-slate-950 px-3 py-1 rounded-xl font-bold text-xs sm:text-sm shadow-lg flex items-center gap-2">
+                    <span id="hudWorldName">Dunia 1: Siklus Air</span>
+                    <span class="bg-black text-yellow-400 px-2 py-0.5 rounded text-xs" id="hudQuestionCounter">Soal: 0/4</span>
+                </div>
+
+                <!-- Right HUD: Score & Map Button -->
+                <div class="flex items-center space-x-2 pointer-events-auto">
+                    <div class="bg-slate-900/85 border-2 border-white/80 text-white px-3 py-1.5 rounded-xl font-pixel text-[10px] sm:text-xs text-yellow-400">
+                        SKOR: <span id="hudScore">0</span>
+                    </div>
+                    <button onclick="game.openStudyInGame()" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs px-2.5 py-1.5 rounded-xl border-2 border-black shadow">
+                        📖 Materi
+                    </button>
+                    <button onclick="game.pauseToMap()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-2.5 py-1.5 rounded-xl border-2 border-black shadow">
+                        🗺️ Peta
+                    </button>
+                </div>
+            </div>
+
+            <!-- HTML5 Canvas -->
+            <div id="canvasContainer" class="relative flex-1 w-full h-full overflow-hidden">
+                <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+                <!-- Floating Toast Notification inside Game -->
+                <div id="gameToast" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-slate-900/95 text-white border-2 border-yellow-400 px-4 py-2 rounded-full font-bold text-xs sm:text-sm shadow-xl whitespace-nowrap">
+                    ✨ Koin Pengetahuan +10!
+                </div>
+            </div>
+
+            <!-- MOBILE TOUCH CONTROLS OVERLAY (Bottom) -->
+            <div class="absolute bottom-3 left-3 right-3 z-20 flex items-end justify-between pointer-events-none">
+                <!-- Directional Left / Right -->
+                <div class="flex space-x-3 pointer-events-auto">
+                    <button id="btnLeft" class="dpad-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex flex-col items-center justify-center text-white select-none">
+                        <span class="text-2xl sm:text-3xl leading-none">◀</span>
+                        <span class="text-[10px] font-bold mt-0.5">KIRI</span>
+                    </button>
+                    <button id="btnRight" class="dpad-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex flex-col items-center justify-center text-white select-none">
+                        <span class="text-2xl sm:text-3xl leading-none">▶</span>
+                        <span class="text-[10px] font-bold mt-0.5">KANAN</span>
+                    </button>
+                </div>
+
+                <!-- Center Hint for Mobile/Desktop -->
+                <div class="hidden md:block bg-black/50 text-white/90 px-3 py-1 rounded-full text-xs">
+                    Gunakan Tombol Layar atau Keyboard [◀ / ▶ / W / SPASI] untuk Melompat
+                </div>
+
+                <!-- Action Jump Button -->
+                <div class="flex space-x-3 pointer-events-auto">
+                    <button id="btnJump" class="dpad-btn w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-red-500/60 border-yellow-300 flex flex-col items-center justify-center text-white select-none shadow-2xl">
+                        <span class="text-2xl sm:text-3xl leading-none">🚀</span>
+                        <span class="text-xs font-extrabold tracking-wider mt-1">LOMPAT</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 4: FINAL SCORE & LEARNING REPORT    -->
+        <!-- ========================================== -->
+        <div id="screenReport" class="hidden flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 text-slate-800">
+            <div class="max-w-4xl mx-auto bg-white panel-retro rounded-2xl p-5 sm:p-8">
+                <!-- Header Laporan -->
+                <div class="border-b-4 border-slate-900 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Laporan Hasil Belajar Siswa</span>
+                        <h2 class="font-pixel text-lg sm:text-2xl text-slate-900 mt-2">PETUALANGAN SAINS</h2>
+                        <p id="reportSchoolHeader" class="font-bold text-slate-600 text-sm">SMA Negeri 1 Sains Nusantara</p>
+                    </div>
+                    <div class="bg-amber-100 border-3 border-amber-500 rounded-2xl p-3 text-center min-w-[140px]">
+                        <span class="text-xs font-bold text-amber-900 block uppercase">Nilai Akhir</span>
+                        <span id="reportFinalGrade" class="font-pixel text-3xl sm:text-4xl text-emerald-600 block my-1">100</span>
+                        <span id="reportPredicate" class="text-xs font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full">Sangat Baik (A)</span>
+                    </div>
+                </div>
+
+                <!-- Student & Teacher Metadata -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border-2 border-slate-300 mb-6 text-xs sm:text-sm">
+                    <div>
+                        <span class="text-slate-500 block">Nama Siswa:</span>
+                        <strong id="repStudent" class="text-slate-900 text-sm sm:text-base">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Jenjang / Kelas:</span>
+                        <strong id="repClass" class="text-slate-900 text-sm sm:text-base">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Guru Pengampu:</span>
+                        <strong id="repTeacher" class="text-slate-900 text-sm sm:text-base">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Mata Pelajaran:</span>
+                        <strong id="repSubject" class="text-slate-900">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Materi Pokok:</span>
+                        <strong id="repTopic" class="text-slate-900">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Total Skor Game:</span>
+                        <strong id="repGameScore" class="text-amber-600 text-sm sm:text-base">0 Poin</strong>
+                    </div>
+                </div>
+
+                <!-- Sub-Topic Mastery Breakdown -->
+                <h3 class="font-bold text-base sm:text-lg mb-3 flex items-center gap-2">
+                    <span>📈</span> Capaian Penguasaan per Sub-Materi Ekosistem
+                </h3>
+                <div id="reportSubtopicGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                    <!-- Populated via JS -->
+                </div>
+
+                <!-- Detailed 15 Questions Review -->
+                <h3 class="font-bold text-base sm:text-lg mb-3 flex items-center gap-2">
+                    <span>📝</span> Rincian Jawaban & Pembahasan (15 Soal)
+                </h3>
+                <div id="reportQuestionList" class="space-y-3 mb-6 max-h-96 overflow-y-auto pr-1">
+                    <!-- Populated via JS -->
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t-2 border-slate-200">
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="app.showMapScreen()" class="btn-retro bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl">
+                            🗺️ Kembali ke Peta Level
+                        </button>
+                        <button onclick="app.resetAndPlayAgain()" class="btn-retro bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl">
+                            🔄 Main Ulang Semua Level
+                        </button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="app.copyReportText()" class="btn-retro bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl">
+                            📋 Salin Hasil (WA/Teks)
+                        </button>
+                        <button onclick="window.print()" class="btn-retro bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl">
+                            🖨️ Cetak / Simpan PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SCREEN 5: TEACHER CUSTOMIZATION PANEL      -->
+        <!-- ========================================== -->
+        <div id="screenTeacher" class="hidden flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 text-slate-800">
+            <div class="max-w-4xl mx-auto bg-white panel-retro rounded-2xl p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-4 border-slate-900 pb-4 mb-4">
+                    <div>
+                        <span class="bg-amber-400 text-slate-950 text-xs font-bold px-2.5 py-0.5 rounded border border-black">MODE KUSTOMISASI GURU</span>
+                        <h2 class="font-pixel text-base sm:text-xl text-slate-900 mt-1">EDITOR MATERI, GAMBAR & 15 SOAL</h2>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="teacherEditor.resetDefault()" class="btn-retro bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold px-3 py-2 rounded-xl">
+                            ♻️ Reset Default
+                        </button>
+                        <button onclick="teacherEditor.saveAndClose()" class="btn-retro bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl">
+                            💾 Simpan & Kembali
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabs: Ringkasan Materi vs Daftar 15 Soal -->
+                <div class="flex space-x-2 mb-4">
+                    <button id="tabBtnQuestions" onclick="teacherEditor.switchTab('questions')" class="px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-900 text-yellow-400 border-2 border-black">
+                        ❓ Edit 15 Soal, Gambar & Pembahasan
+                    </button>
+                    <button id="tabBtnMaterials" onclick="teacherEditor.switchTab('materials')" class="px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-200 text-slate-700 border-2 border-transparent">
+                        📘 Edit Ringkasan Sub-Materi
+                    </button>
+                </div>
+
+                <!-- Tab 1: Edit 15 Questions -->
+                <div id="teacherTabQuestions">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 bg-amber-50 p-3 rounded-xl border border-amber-300 text-xs">
+                        <span>📌 Guru dapat mengubah <b>pertanyaan, sub-materi, gambar objek (preset/URL), pilihan jawaban A-E, kunci jawaban, dan penjelasan singkat</b>.</span>
+                        <select id="filterSubtopicSelect" onchange="teacherEditor.renderQuestionEditorList()" class="px-3 py-1.5 rounded-lg border-2 border-slate-800 font-bold bg-white">
+                            <option value="ALL">Tampilkan Semua (15 Soal)</option>
+                            <option value="air">💧 Siklus Air (Soal 1-4)</option>
+                            <option value="karbon">🌿 Siklus Karbon (Soal 5-8)</option>
+                            <option value="nitrogen">⚡ Siklus Nitrogen (Soal 9-12)</option>
+                            <option value="sulfur">🌋 Siklus Sulfur & Belerang (Soal 13-15)</option>
+                        </select>
+                    </div>
+
+                    <div id="editorQuestionsContainer" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Tab 2: Edit Study Materials -->
+                <div id="teacherTabMaterials" class="hidden space-y-4">
+                    <div id="editorMaterialsContainer" class="space-y-4">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL 1: INTERACTIVE QUESTION POPUP [?]    -->
+        <!-- ========================================== -->
+        <div id="modalQuestion" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+            <div class="bg-white panel-retro rounded-2xl max-w-2xl w-full overflow-hidden my-auto animate-fadeIn">
+                <!-- Modal Top Bar -->
+                <div class="bg-amber-400 border-b-4 border-black px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-black text-yellow-400 font-pixel text-xs px-2.5 py-1 rounded">[?]</span>
+                        <span id="qModalBadge" class="font-bold text-xs sm:text-sm text-slate-900 uppercase">Siklus Air - Soal #1</span>
+                    </div>
+                    <span class="text-xs font-bold bg-white px-2.5 py-1 rounded-full border-2 border-black">
+                        Benar: +100 Poin | Salah: -1 ❤️
+                    </span>
+                </div>
+
+                <div class="p-4 sm:p-6 max-h-[82vh] overflow-y-auto">
+                    <!-- Visual Diagram / Object Image Related to Question -->
+                    <div class="mb-4 bg-slate-100 border-3 border-slate-800 rounded-xl p-3 flex flex-col items-center justify-center">
+                        <div id="qModalImageContainer" class="w-full max-w-md h-40 sm:h-48 flex items-center justify-center overflow-hidden rounded-lg bg-white border border-slate-300">
+                            <!-- SVG or Custom Image URL injected here -->
+                        </div>
+                        <span id="qModalCaption" class="text-[11px] font-bold text-slate-600 mt-1.5">Ilustrasi Objek Soal</span>
+                    </div>
+
+                    <!-- Question Text -->
+                    <p id="qModalText" class="font-bold text-slate-900 text-sm sm:text-base mb-4 leading-relaxed">
+                        Pertanyaan akan tampil di sini...
+                    </p>
+
+                    <!-- Options Grid -->
+                    <div id="qModalOptions" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+                        <!-- Option Buttons A, B, C, D -->
+                    </div>
+
+                    <!-- Feedback & Explanation Box (Hidden until answered) -->
+                    <div id="qModalFeedback" class="hidden rounded-xl p-4 border-3 border-black mb-2">
+                        <div id="qModalFeedbackTitle" class="font-pixel text-xs sm:text-sm mb-1.5"></div>
+                        <p id="qModalExplanation" class="text-xs sm:text-sm font-medium leading-relaxed"></p>
+                        <div class="mt-3 text-right">
+                            <button onclick="game.closeQuestionModal()" class="btn-retro bg-slate-900 hover:bg-slate-800 text-yellow-400 font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl">
+                                ▶️ LANJUTKAN PETUALANGAN
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL 2: STUDY GUIDE / MATERI POPUP        -->
+        <!-- ========================================== -->
+        <div id="modalStudy" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+            <div class="bg-white panel-retro rounded-2xl max-w-2xl w-full overflow-hidden">
+                <div class="bg-sky-400 border-b-4 border-black px-4 py-3 flex items-center justify-between">
+                    <h3 class="font-pixel text-xs sm:text-sm text-slate-950">📖 ENSIKLOPEDIA SAINS EKOSISTEM</h3>
+                    <button onclick="app.closeStudyModal()" class="bg-red-600 text-white font-bold px-2.5 py-1 rounded border-2 border-black text-xs">✖ Tutup</button>
+                </div>
+                <div class="p-4 sm:p-6 max-h-[75vh] overflow-y-auto">
+                    <div class="flex flex-wrap gap-2 mb-4" id="studyModalTabs">
+                        <!-- Tabs for 4 Cycles -->
+                    </div>
+                    <div id="studyModalContent" class="bg-slate-50 border-2 border-slate-800 rounded-xl p-4 space-y-3">
+                        <!-- Content -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL 3: LEVEL COMPLETE / GAME OVER DIALOG -->
+        <!-- ========================================== -->
+        <div id="modalDialog" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white panel-retro rounded-2xl max-w-md w-full p-6 text-center">
+                <div id="dialogIcon" class="text-5xl mb-3">🏆</div>
+                <h3 id="dialogTitle" class="font-pixel text-base sm:text-lg text-slate-900 mb-2">LEVEL SELESAI!</h3>
+                <p id="dialogMessage" class="text-xs sm:text-sm text-slate-600 font-medium mb-5"></p>
+                <div id="dialogButtons" class="flex flex-col sm:flex-row gap-2 justify-center">
+                    <!-- Dynamic Action Buttons -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- COMPLETE JAVASCRIPT ENGINE (AUDIO, DATA, GAME, UI)    -->
+    <!-- ===================================================== -->
+    <script>
+        /**********************************************************
+         * 1. WEB AUDIO SYNTHESIZER (8-BIT MARIO-STYLE RETRO SFX)
+         **********************************************************/
+        class RetroSoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.bgmEnabled = true;
+                this.sfxEnabled = true;
+                this.bgmInterval = null;
+                this.noteIndex = 0;
+                // Cheerful 8-bit adventure melody notes (Hz)
+                this.melody = [
+                    330, 330, 0, 330, 0, 262, 330, 0, 392, 0, 0, 0, 196, 0, 0, 0,
+                    262, 0, 0, 196, 0, 0, 165, 0, 0, 220, 0, 247, 0, 233, 220, 0,
+                    196, 330, 392, 440, 0, 349, 392, 0, 330, 0, 262, 294, 247, 0, 0, 0
+                ];
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playTone(freq, duration, type = 'square', volume = 0.08, slideTo = null) {
+                if (!this.sfxEnabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    if (slideTo) {
+                        osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
+                    }
+                    gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {}
+            }
+
+            jump() {
+                this.playTone(180, 0.22, 'square', 0.08, 520);
+            }
+
+            coin() {
+                this.playTone(987.77, 0.08, 'square', 0.07);
+                setTimeout(() => this.playTone(1318.51, 0.25, 'square', 0.07), 75);
+            }
+
+            book() {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((n, i) => {
+                    setTimeout(() => this.playTone(n, 0.1, 'triangle', 0.1), i * 60);
+                });
+            }
+
+            questionBlock() {
+                const notes = [392, 440, 493.88, 523.25, 587.33];
+                notes.forEach((n, i) => {
+                    setTimeout(() => this.playTone(n, 0.07, 'square', 0.07), i * 45);
+                });
+            }
+
+            stomp() {
+                this.playTone(280, 0.15, 'triangle', 0.12, 90);
+            }
+
+            correct() {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((n, i) => {
+                    setTimeout(() => this.playTone(n, 0.15, 'square', 0.09), i * 95);
+                });
+            }
+
+            wrong() {
+                this.playTone(220, 0.2, 'sawtooth', 0.1, 130);
+                setTimeout(() => this.playTone(160, 0.35, 'sawtooth', 0.1, 95), 200);
+            }
+
+            levelWin() {
+                const fanfare = [392, 523, 659, 784, 659, 784, 1046];
+                fanfare.forEach((n, i) => {
+                    setTimeout(() => this.playTone(n, 0.16, 'square', 0.08), i * 110);
+                });
+            }
+
+            startBGM() {
+                if (this.bgmInterval) clearInterval(this.bgmInterval);
+                this.noteIndex = 0;
+                this.bgmInterval = setInterval(() => {
+                    if (!this.bgmEnabled || !game.isRunning || game.isPaused) return;
+                    const freq = this.melody[this.noteIndex % this.melody.length];
+                    this.noteIndex++;
+                    if (freq > 0 && this.ctx) {
+                        try {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+                            osc.type = 'triangle';
+                            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                            gain.gain.setValueAtTime(0.035, this.ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.13);
+                            osc.connect(gain);
+                            gain.connect(this.ctx.destination);
+                            osc.start();
+                            osc.stop(this.ctx.currentTime + 0.13);
+                        } catch (e) {}
+                    }
+                }, 150);
+            }
+
+            stopBGM() {
+                if (this.bgmInterval) {
+                    clearInterval(this.bgmInterval);
+                    this.bgmInterval = null;
+                }
+            }
+
+            toggleBGM() {
+                this.init();
+                this.bgmEnabled = !this.bgmEnabled;
+                document.getElementById('bgmIcon').textContent = this.bgmEnabled ? '🎵' : '🔇';
+                document.getElementById('bgmText').textContent = this.bgmEnabled ? 'Musik: ON' : 'Musik: OFF';
+            }
+
+            toggleSFX() {
+                this.init();
+                this.sfxEnabled = !this.sfxEnabled;
+                document.getElementById('sfxIcon').textContent = this.sfxEnabled ? '🔊' : '🔈';
+                document.getElementById('sfxText').textContent = this.sfxEnabled ? 'SFX: ON' : 'SFX: OFF';
+            }
+        }
+
+        const sound = new RetroSoundEngine();
+
+        /**********************************************************
+         * 2. VISUAL SVG DIAGRAMS FOR QUESTIONS & SUB-MATERIALS
+         **********************************************************/
+        const SVG_PRESETS = {
+            evaporasi: {
+                label: "Diagram Evaporasi & Siklus Air Laut",
+                svg: `<svg viewBox="0 0 400 180" class="w-full h-full">
+                    <rect width="400" height="180" fill="#e0f2fe"/>
+                    <circle cx="70" cy="45" r="26" fill="#facc15" stroke="#ca8a04" stroke-width="3"/>
+                    <path d="M95 65 L145 110 M80 75 L115 120" stroke="#facc15" stroke-width="3" stroke-dasharray="4 4"/>
+                    <path d="M0 135 Q100 120 200 135 T400 135 L400 180 L0 180 Z" fill="#0284c7"/>
+                    <text x="80" y="162" fill="#fff" font-size="13" font-weight="bold">LAUTAN (H₂O)</text>
+                    <path d="M180 125 C175 100 185 95 180 70" stroke="#0369a1" stroke-width="4" fill="none"/>
+                    <polygon points="180,62 173,74 187,74" fill="#0369a1"/>
+                    <path d="M220 125 C215 100 225 95 220 70" stroke="#0369a1" stroke-width="4" fill="none"/>
+                    <polygon points="220,62 213,74 227,74" fill="#0369a1"/>
+                    <rect x="145" y="75" width="110" height="24" rx="6" fill="#fff" stroke="#0284c7" stroke-width="2"/>
+                    <text x="200" y="91" text-anchor="middle" fill="#0f172a" font-size="12" font-weight="bold">PROSES X ?</text>
+                    <g fill="#fff" stroke="#94a3b8" stroke-width="2">
+                        <circle cx="290" cy="45" r="18"/><circle cx="315" cy="40" r="22"/><circle cx="340" cy="47" r="17"/>
+                    </g>
+                </svg>`
+            },
+            transpirasi: {
+                label: "Penguapan Air dari Stomata Tumbuhan (Transpirasi)",
+                svg: `<svg viewBox="0 0 400 180" class="w-full h-full">
+                    <rect width="400" height="180" fill="#ecfdf5"/>
+                    <rect x="0" y="145" width="400" height="35" fill="#78350f"/>
+                    <rect x="185" y="85" width="30" height="65" fill="#92400e"/>
+                    <circle cx="200" cy="65" r="42" fill="#16a34a"/>
+                    <circle cx="165" cy="80" r="30" fill="#22c55e"/>
+                    <circle cx="235" cy="80" r="30" fill="#15803d"/>
+                    <path d="M170 40 L170 15 M200 30 L200 8 M230 40 L230 15" stroke="#0284c7" stroke-width="4" stroke-linecap="round"/>
+                    <text x="200" y="168" text-anchor="middle" fill="#fef3c7" font-size="12" font-weight="bold">AKAR MENYERAP AIR TANAH</text>
+                    <rect x="255" y="25" width="130" height="45" rx="8" fill="#fff" stroke="#16a34a" stroke-width="2"/>
+                    <text x="320" y="45" text-anchor="middle" fill="#065f46" font-size="11" font-weight="bold">Uap Air H₂O</text>
+                    <text x="320" y="61" text-anchor="middle" fill="#047857" font-size="10">Dari Stomata Daun</text>
+                </svg>`
+            },
+            kondensasi_infiltrasi: {
+                label: "Kondensasi Awan, Presipitasi & Infiltrasi Tanah",
+                svg: `<svg viewBox="0 0 400 180" class="w-full h-full">
+                    <rect width="400" height="180" fill="#dbeafe"/>
+                    <g fill="#64748b">
+                        <circle cx="110" cy="40" r="20"/><circle cx="135" cy="35" r="25"/><circle cx="165" cy="42" r="20"/>
+                    </g>
+                    <text x="137" y="44" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">AWAN DINGIN</text>
+                    <path d="M115 68 L105 100 M135 68 L125 100 M155 68 L145 100" stroke="#2563eb" stroke-width="3" stroke-dasharray="6 4"/>
+                    <polygon points="0,180 0,120 180,105 400,145 400,180" fill="#65a30d"/>
+                    <polygon points="0,180 0,140 180,125 400,160 400,180" fill="#78350f"/>
+                    <path d="M240 120 L240 165 M280 128 L280 170" stroke="#38bdf8" stroke-width="4"/>
+                    <text x="310" y="105" fill="#1e3a8a" font-size="12" font-weight="bold">Rembesan Air Tanah</text>
+                </svg>`
+            },
+            fotosintesis_karbon: {
+                label: "Pertukaran CO₂ dan O₂ dalam Siklus Karbon",
+                svg: `<svg viewBox="0 0 400 180" class="w-full h-full">
+                    <rect width="400" height="180" fill="#f0fdf4"/>
+                    <rect x="30" y="25" width="110" height="36" rx="8" fill="#e2e8f0" stroke="#334155" stroke-width="2"/>
+                    <text x="85" y="48" text-anchor="middle" font-size="13" font-weight="bold" fill="#0f172a">CO₂ Atmosfer</text>
+                    <path d="M145 45 Q220 45 255 85" stroke="#16a34a" stroke-width="4" fill="none"/>
+                    <circle cx="285" cy="115" r="38" fill="#22c55e" stroke="#14532d" stroke-width="3"/>
+                    <text x="285" y="118" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">TUMBUHAN HIJAU</text>
+                    <rect x="40" y="110" width="130" height="45" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+                    <text x="105" y="130" text-anchor="middle" font-size="11" font-weight="bold" fill="#92400e">C₆H₁₂O₆ + O₂</text>
+                    <text x="105" y="145" text-anchor="middle" font-size="10" fill="#78350f">Glukosa & Oksigen</text>
+                </svg>`
+            },
+            respirasi_fosil: {
+                label: "Emisi Bahan Bakar Fosil & Respirasi Organisme",
+                svg: `<svg viewBox="0 0 400 180" class="w-full h-full">
+                    <rect width="400" height="180" fill="#fef2f2"/>
+                    <rect x="0" y="145" width="400" height="35" fill="#334155"/>
+                    <rect x="55" y="85" width="75" height="60" fill="#64748b" stroke="#1e293b" stroke-width="2"/>
+                    <rect x="70" y="50" width="18" height="35" fill="#475569"/>
+                    <rect x="100" y="55" width="18" height="30" fill="#475569"/>
+                    <circle cx="85" cy="35" r="14" fill="#94a3b8"/>
+                    <circle cx="110" cy="28" r="18" fill="#94a3b8"/>
+                    <circle cx="140" cy="22" r="20" fill="#cbd5e1"/>
+                    <text x="255" y="55" font-size="13" font-weight="bold" fill="#991b1b">Peningkatan Gas CO₂</text>
+                    <text x="255" y="75" font-size="11" fill="#7f1d1d">Efek Rumah Kaca &</text>
+                    <text x="255" y="92" font-size="11" fill="#7f1d1d">Pemanasan Global</text>
+                </svg>`
+            },
+            fiksasi_nitrogen: {
+                label: "Bintil Akar Leguminosae & Bakteri Rhizobium",
+                svg: `<svg viewBox="0 0 400 180" class="w-full h-full">
+                    <rect width="400" height="75" fill="#e0e7ff"/>
+                    <rect y="75" width="400" height="105" fill="#78350f"/>
+                    <text x="75" y="45" font-size="14" font-weight="bold" fill="#1e1b4b">Gas N₂ (78% Udara)</text>
+                    <path d="M195 30 L195 75" stroke="#16a34a" stroke-width="8"/>
+                    <path d="M195 75 L160 135 M195 75 L200 150 M195 75 L240 130" stroke="#fde047" stroke-width="4" fill="none"/>
+                    <circle cx="168" cy="120" r="8" fill="#fb7185" stroke="#fff" stroke-width="2"/>
+                    <circle cx="200" cy="130" r="9" fill="#fb7185" stroke="#fff" stroke-width="2"/>
+                    <circle cx="230" cy="118" r="8" fill="#fb7185" stroke="#fff" stroke-width="2"/>
+                    <rect x="245" y="95" width="140" height="55" rx="8" fill="#fff" stroke="#f43f5e" stroke-width="2"/>
+                    <text x="315" y="118" text-anchor="middle" font-size="11" font-weight="bold" fill="#881337">Bintil Akar Kacang</text>
+                    <text x="315" y="136" text-anchor="middle" font-size="10" fill="#9f1239">Simbiosis Bakteri Fiksasi</text>
+                </svg>`
+            },
+            nitrifikasi_nitrogen: {
+                label: "Tahapan Nitrifikasi & Denitrifikasi di Dalam Tanah",
+                svg: `<svg viewBox="0 0 400 180" class="w-full h-full">
+                    <rect width="400" height="180" fill="#f3e8ff"/>
+                    <rect x="20" y="65" width="90" height="50" rx="10" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+                    <text x="65" y="90" text-anchor="middle" font-size="13" font-weight="bold">NH₃ / NH₄⁺</text>
+                    <text x="65" y="105" text-anchor="middle" font-size="9">Amonia / Amonium</text>
+                    <path d="M115 90 L148 90" stroke="#000" stroke-width="3"/>
+                    <rect x="152" y="65" width="90" height="50" rx="10" fill="#fed7aa" stroke="#ea580c" stroke-width="2"/>
+                    <text x="197" y="90" text-anchor="middle" font-size="13" font-weight="bold">NO₂⁻</text>
+                    <text x="197" y="105" text-anchor="middle" font-size="9">Nitrit (Nitrosomonas)</text>
+                    <path d="M246 90 L278 90" stroke="#000" stroke-width="3"/>
+                    <rect x="282" y="65" width="98" height="50" rx="10" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+                    <text x="331" y="90" text-anchor="middle" font-size="13" font-weight="bold">NO₃⁻</text>
+                    <text x="331" y="105" text-anchor="middle" font-size="9">Nitrat (Nitrobacter)</text>
+                </svg>`
+            },
+            sulfur_gunung: {
+                label: "Erupsi Vulkanik Gunung Berapi & Siklus Belerang (Sulfur)",
+                svg: `<svg viewBox="0 0 400 180" class="w-full h-full">
+                    <rect width="400" height="180" fill="#fef9c3"/>
+                    <polygon points="40,175 130,65 220,175" fill="#57534e" stroke="#292524" stroke-width="3"/>
+                    <polygon points="112,85 130,65 148,85" fill="#ef4444"/>
+                    <circle cx="130" cy="40" r="18" fill="#a8a29e"/>
+                    <circle cx="155" cy="30" r="22" fill="#78716c"/>
+                    <text x="145" y="35" text-anchor="middle" fill="#fef08a" font-size="11" font-weight="bold">SO₂ & H₂S</text>
+                    <rect x="235" y="35" width="145" height="55" rx="8" fill="#fef08a" stroke="#ca8a04" stroke-width="2"/>
+                    <text x="307" y="58" text-anchor="middle" font-size="12" font-weight="bold" fill="#713f12">Hujan Asam (H₂SO₄)</text>
+                    <text x="307" y="75" text-anchor="middle" font-size="10" fill="#854d0e">Ion Sulfat (SO₄²⁻) di Tanah</text>
+                    <path d="M295 95 L285 145 M320 95 L310 145" stroke="#ca8a04" stroke-width="3" stroke-dasharray="5 4"/>
+                </svg>`
+            }
+        };
+
+        /**********************************************************
+         * 3. DEFAULT CURRICULUM: 4 WORLDS & 15 QUESTIONS
+         **********************************************************/
+        const DEFAULT_MATERIALS = [
+            {
+                id: 'air',
+                title: 'Dunia 1: Siklus Air (Hidrologi)',
+                icon: '💧',
+                color: 'sky',
+                summary: 'Siklus Air (Hidrologi) adalah perputaran air yang tidak pernah berhenti dari atmosfer ke bumi dan kembali ke atmosfer. Tahapan utamanya meliputi: (1) Evaporasi (penguapan benda abiotik/laut), (2) Transpirasi (penguapan dari jaringan tumbuhan), (3) Kondensasi (pendinginan uap air menjadi titik air/awan), (4) Presipitasi (jatuhnya hujan), dan (5) Infiltrasi (peresapan air ke pori-pori tanah menjadi air tanah).'
+            },
+            {
+                id: 'karbon',
+                title: 'Dunia 2: Siklus Karbon & Oksigen',
+                icon: '🌿',
+                color: 'emerald',
+                summary: 'Siklus Karbon melibatkan pertukaran timbal balik antara proses Fotosintesis dan Respirasi. Tumbuhan hijau menyerap CO₂ dari udara untuk fotosintesis menghasilkan glukosa dan O₂. Sebaliknya, respirasi makhluk hidup, dekomposisi organisme mati, dan pembakaran bahan bakar fosil melepaskan kembali CO₂ ke atmosfer.'
+            },
+            {
+                id: 'nitrogen',
+                title: 'Dunia 3: Siklus Nitrogen',
+                icon: '⚡',
+                color: 'purple',
+                summary: 'Meskipun 78% udara adalah gas N₂, tumbuhan tidak dapat menyerapnya secara langsung. Tahapan siklus nitrogen meliputi: (1) Fiksasi N₂ oleh bakteri Rhizobium pada bintil akar kacang-kacangan, (2) Amonifikasi penguraian menjadi amonia (NH₃), (3) Nitrifikasi oleh bakteri Nitrosomonas (mengubah amonia jadi nitrit NO₂⁻) dan Nitrobacter (mengubah nitrit jadi nitrat NO₃⁻), (4) Asimilasi penyerapan nitrat oleh akar, dan (5) Denitrifikasi pelepasan N₂ kembali ke udara oleh Pseudomonas.'
+            },
+            {
+                id: 'sulfur',
+                title: 'Dunia 4: Siklus Sulfur (Belerang)',
+                icon: '🌋',
+                color: 'amber',
+                summary: 'Sulfur (belerang) berasal dari aktivitas gunung berapi, pembakaran fosil, dan penguraian organik dalam bentuk gas Sulfur Dioksida (SO₂) dan Hidrogen Sulfida (H₂S). Di atmosfer, SO₂ bereaksi dengan uap air membentuk asam sulfat (H₂SO₄) yang turun bersama hujan asam. Di dalam tanah, tumbuhan menyerap belerang hanya dalam bentuk ion Sulfat anorganik (SO₄²⁻).'
+            }
+        ];
+
+        const DEFAULT_QUESTIONS = [
+            // --- DUNIA 1: SIKLUS AIR (Soal 1 - 4) ---
+            {
+                id: 1,
+                subtopic: 'air',
+                question: 'Perhatikan gambar siklus hidrologi di atas! Proses perubahan wujud air laut menjadi gas uap air yang naik ke atmosfer akibat panas sinar matahari (ditunjukkan tanda panah ke atas) disebut...',
+                presetImage: 'evaporasi',
+                customImageUrl: '',
+                options: ['Evaporasi', 'Kondensasi', 'Presipitasi', 'Infiltrasi', 'Perkolasi'],
+                correct: 0,
+                explanation: 'Evaporasi adalah proses penguapan air dari permukaan perairan (laut, danau, sungai) menjadi uap air karena energi panas matahari.'
+            },
+            {
+                id: 2,
+                subtopic: 'air',
+                question: 'Selain dari permukaan laut, uap air di atmosfer juga berasal dari penguapan jaringan makhluk hidup, khususnya melalui mulut daun (stomata) pada tumbuhan. Proses ini dinamakan...',
+                presetImage: 'transpirasi',
+                customImageUrl: '',
+                options: ['Guttasi', 'Transpirasi', 'Perkolasi', 'Sublimasi', 'Intersepsi'],
+                correct: 1,
+                explanation: 'Transpirasi adalah proses pelepasan uap air dari jaringan tumbuhan (terutama melalui stomata daun) ke atmosfer.'
+            },
+            {
+                id: 3,
+                subtopic: 'air',
+                question: 'Ketika uap air naik ke lapisan atmosfer yang tinggi dan bersuhu dingin, uap air tersebut berubah wujud menjadi partikel titik-titik air atau kristal es pembentuk awan. Tahapan ini disebut...',
+                presetImage: 'kondensasi_infiltrasi',
+                customImageUrl: '',
+                options: ['Evaporasi', 'Run-off (Limpasan)', 'Kondensasi', 'Adveksi', 'Infiltrasi'],
+                correct: 2,
+                explanation: 'Kondensasi adalah proses pengembunan uap air menjadi titik-titik air cair atau es yang berkumpul membentuk gumpalan awan.'
+            },
+            {
+                id: 4,
+                subtopic: 'air',
+                question: 'Setelah hujan (presipitasi) turun membasahi daratan, sebagian air akan merembes masuk ke dalam pori-pori tanah secara vertikal menjadi cadangan air tanah. Proses perembesan ini disebut...',
+                presetImage: 'kondensasi_infiltrasi',
+                customImageUrl: '',
+                options: ['Infiltrasi', 'Transpirasi', 'Kondensasi', 'Evapotranspirasi', 'Sublimasi'],
+                correct: 0,
+                explanation: 'Infiltrasi adalah proses meresapnya air hujan dari permukaan tanah ke dalam lapisan tanah untuk mengisi cadangan air tanah (akuifer).'
+            },
+
+            // --- DUNIA 2: SIKLUS KARBON (Soal 5 - 8) ---
+            {
+                id: 5,
+                subtopic: 'karbon',
+                question: 'Dalam ekosistem darat maupun perairan, gas karbon dioksida (CO₂) di atmosfer diserap oleh organisme autotrof (tumbuhan hijau & fitoplankton) untuk diubah menjadi glukosa melalui proses...',
+                presetImage: 'fotosintesis_karbon',
+                customImageUrl: '',
+                options: ['Respirasi seluler', 'Fotosintesis', 'Dekomposisi anaerob', 'Kemosintesis sulfur', 'Fermentasi alkohol'],
+                correct: 1,
+                explanation: 'Melalui fotosintesis, klorofil tumbuhan menangkap energi cahaya matahari untuk mereaksikan CO₂ dan H₂O menjadi senyawa organik glukosa (C₆H₁₂O₆) serta oksigen (O₂).'
+            },
+            {
+                id: 6,
+                subtopic: 'karbon',
+                question: 'Seluruh makhluk hidup (hewan, manusia, maupun tumbuhan) membongkar glukosa di dalam sel tubuhnya untuk menghasilkan energi dan melepaskan kembali gas CO₂ ke udara melalui proses...',
+                presetImage: 'fotosintesis_karbon',
+                customImageUrl: '',
+                options: ['Fiksasi karbon', 'Asimilasi', 'Respirasi (Pernapasan)', 'Transpirasi', 'Nitrifikasi'],
+                correct: 2,
+                explanation: 'Respirasi seluler menggunakan oksigen (O₂) untuk memecah glukosa menjadi energi (ATP), uap air (H₂O), dan melepaskan gas karbon dioksida (CO₂) kembali ke atmosfer.'
+            },
+            {
+                id: 7,
+                subtopic: 'karbon',
+                question: 'Sisa-sisa organisme purba yang terkubur jutaan tahun di kerak bumi akan mengalami tekanan dan suhu tinggi sehingga membentuk cadangan karbon berupa...',
+                presetImage: 'respirasi_fosil',
+                customImageUrl: '',
+                options: ['Batu apung dan pasir kuarsa', 'Bahan bakar fosil (batu bara, minyak bumi, gas alam)', 'Endapan garam mineral', 'Lapisan ozon stratosfer', 'Kristal belerang vulkanik'],
+                correct: 1,
+                explanation: 'Jasad organisme yang tidak terurai sempurna selama jutaan tahun bertransformasi menjadi bahan bakar fosil (batu bara, minyak bumi, dan gas alam) yang kaya senyawa hidrokarbon.'
+            },
+            {
+                id: 8,
+                subtopic: 'karbon',
+                question: 'Aktivitas industri, pembakaran bahan bakar fosil secara masif, dan penebangan hutan (deforestasi) menyebabkan konsentrasi CO₂ di atmosfer melonjak tajam. Dampak ekologis langsung dari fenomena ini adalah...',
+                presetImage: 'respirasi_fosil',
+                customImageUrl: '',
+                options: ['Penurunan suhu rata-rata bumi', 'Meningkatnya efek rumah kaca dan pemanasan global', 'Berkurangnya kadar nitrogen di udara', 'Berhentinya proses siklus hidrologi', 'Menipisnya kerak litosfer bumi'],
+                correct: 1,
+                explanation: 'CO₂ adalah gas rumah kaca utama yang memerangkap radiasi panas inframerah di atmosfer bumi, sehingga memicu pemanasan global (global warming).'
+            },
+
+            // --- DUNIA 3: SIKLUS NITROGEN (Soal 9 - 12) ---
+            {
+                id: 9,
+                subtopic: 'nitrogen',
+                question: 'Gas nitrogen (N₂) menyusun sekitar 78% volume atmosfer bumi, namun tumbuhan tidak dapat menyerap gas N₂ secara langsung. Bakteri bersimbiosis pada bintil akar tanaman kacang-kacangan (Leguminosae) yang mampu mengikat N₂ bebas adalah...',
+                presetImage: 'fiksasi_nitrogen',
+                customImageUrl: '',
+                options: ['Rhizobium leguminosarum', 'Escherichia coli', 'Nitrosomonas', 'Pseudomonas denitrificans', 'Thiobacillus ferrooxidans'],
+                correct: 0,
+                explanation: 'Bakteri Rhizobium bersimbiosis mutualisme pada bintil akar tanaman polong-polongan (Leguminosae) untuk memfiksasi N₂ bebas dari udara menjadi amonium.'
+            },
+            {
+                id: 10,
+                subtopic: 'nitrogen',
+                question: 'Dalam tahapan nitrifikasi di dalam tanah, amonia (NH₃) terlebih dahulu dioksidasi menjadi senyawa nitrit (NO₂⁻). Proses nitritasi ini dilakukan oleh bakteri aerob yaitu...',
+                presetImage: 'nitrifikasi_nitrogen',
+                customImageUrl: '',
+                options: ['Nitrobacter', 'Nitrosomonas dan Nitrosococcus', 'Azotobacter', 'Thiobacillus', 'Clostridium pasteurianum'],
+                correct: 1,
+                explanation: 'Bakteri Nitrosomonas dan Nitrosococcus berperan mengoksidasi amonia (NH₃) menjadi ion nitrit (NO₂⁻) pada tahap pertama nitrifikasi.'
+            },
+            {
+                id: 11,
+                subtopic: 'nitrogen',
+                question: 'Senyawa nitrit (NO₂⁻) bersifat racun bagi akar tumbuhan sehingga harus diubah menjadi ion nitrat (NO₃⁻) oleh bakteri Nitrobacter. Tumbuhan paling optimal menyerap nitrogen dari tanah dalam bentuk...',
+                presetImage: 'nitrifikasi_nitrogen',
+                customImageUrl: '',
+                options: ['Gas N₂ bebas', 'Ion Nitrat (NO₃⁻)', 'Asam nitrit pekat', 'Protein kompleks utuh', 'Gas dinitrogen oksida (N₂O)'],
+                correct: 1,
+                explanation: 'Akar tumbuhan menyerap nitrogen terutama dalam bentuk ion Nitrat (NO₃⁻) melalui proses asimilasi untuk membentuk asam amino dan protein.'
+            },
+            {
+                id: 12,
+                subtopic: 'nitrogen',
+                question: 'Pada kondisi tanah yang tergenang air dan miskin oksigen (anaerob), bakteri Pseudomonas denitrificans akan mengubah nitrat (NO₃⁻) kembali menjadi gas N₂ ke udara. Proses ini disebut...',
+                presetImage: 'nitrifikasi_nitrogen',
+                customImageUrl: '',
+                options: ['Fiksasi nitrogen', 'Amonifikasi', 'Nitrifikasi', 'Denitrifikasi', 'Asimilasi nitrogen'],
+                correct: 3,
+                explanation: 'Denitrifikasi adalah proses reduksi senyawa nitrat (NO₃⁻) kembali menjadi gas nitrogen bebas (N₂) ke atmosfer oleh bakteri anaerob.'
+            },
+
+            // --- DUNIA 4: SIKLUS SULFUR & BELERANG (Soal 13 - 15) ---
+            {
+                id: 13,
+                subtopic: 'sulfur',
+                question: 'Perhatikan gambar siklus sulfur! Dalam daur belerang, tumbuhan hanya dapat menyerap unsur sulfur dari dalam tanah melalui akarnya dalam bentuk senyawa anorganik terlarut, yaitu...',
+                presetImage: 'sulfur_gunung',
+                customImageUrl: '',
+                options: ['Ion Sulfat (SO₄²⁻)', 'Gas Belerang murni (S₈)', 'Gas Hidrogen Sulfida (H₂S)', 'Batu pirit padat', 'Gas Sulfur Dioksida (SO₂)'],
+                correct: 0,
+                explanation: 'Sama seperti nitrat pada siklus nitrogen, akar tumbuhan menyerap belerang yang terlarut dalam air tanah dalam bentuk anion Sulfat (SO₄²⁻).'
+            },
+            {
+                id: 14,
+                subtopic: 'sulfur',
+                question: 'Erupsi gunung berapi dan pembakaran batu bara melepaskan gas Sulfur Dioksida (SO₂) ke udara. Ketika gas SO₂ bereaksi dengan uap air dan oksigen di atmosfer, akan terbentuk senyawa yang memicu fenomena...',
+                presetImage: 'sulfur_gunung',
+                customImageUrl: '',
+                options: ['Embun beku (Frost)', 'Hujan Asam (Asam Sulfat / H₂SO₄)', 'Pelangi stratosfer', 'Angin Fohn', 'Aurora borealis'],
+                correct: 1,
+                explanation: 'Gas SO₂ bereaksi di atmosfer membentuk asam sulfat (H₂SO₄). Saat turun bersama hujan, terjadilah Hujan Asam yang dapat merusak tanaman, bangunan, dan menurunkan pH tanah/danau.'
+            },
+            {
+                id: 15,
+                subtopic: 'sulfur',
+                question: 'Ketika organisme mati (hewan/tumbuhan) diuraikan oleh mikroorganisme dekomposer pada kondisi tanpa oksigen (anaerob) seperti di rawa-rawa, protein bersulfur akan direduksi menghasilkan gas berbau busuk seperti telur busuk, yaitu...',
+                presetImage: 'sulfur_gunung',
+                customImageUrl: '',
+                options: ['Karbon monoksida (CO)', 'Hidrogen Sulfida (H₂S)', 'Oksigen murni (O₂)', 'Metana cair', 'Nitrogen dioksida (NO₂)'],
+                correct: 1,
+                explanation: 'Penguraian bahan organik yang mengandung asam amino bersulfur secara anaerob oleh bakteri Desulfovibrio menghasilkan gas Hidrogen Sulfida (H₂S) yang berbau khas menyengat.'
+            }
+        ];
+
+        /**********************************************************
+         * 4. APPLICATION STATE & MANAGEMENT
+         **********************************************************/
+        const app = {
+            config: {
+                school: 'SMA Negeri 1 Sains Nusantara',
+                teacher: 'Ibu Siti Rahmawati, S.Pd., M.Si.',
+                student: 'Budi Santoso',
+                level: 'SMA',
+                className: 'X-A',
+                subject: 'Biologi',
+                topic: 'Ekosistem'
+            },
+            materials: JSON.parse(JSON.stringify(DEFAULT_MATERIALS)),
+            questions: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)),
+
+            // Player Progress
+            score: 0,
+            coins: 0,
+            books: 0,
+            lives: 3,
+            completedWorlds: {}, // {0: true, 1: false...}
+            answersLog: {},      // { questionId: { selectedIndex, isCorrect } }
+
+            init() {
+                this.loadSavedStorage();
+                this.syncHomeInputs();
+            },
+
+            loadSavedStorage() {
+                try {
+                    const savedQ = localStorage.getItem('ps_questions_v2');
+                    const savedM = localStorage.getItem('ps_materials_v2');
+                    if (savedQ) this.questions = JSON.parse(savedQ);
+                    if (savedM) this.materials = JSON.parse(savedM);
+                } catch (e) {}
+            },
+
+            saveToStorage() {
+                try {
+                    localStorage.setItem('ps_questions_v2', JSON.stringify(this.questions));
+                    localStorage.setItem('ps_materials_v2', JSON.stringify(this.materials));
+                } catch (e) {}
+            },
+
+            syncHomeInputs() {
+                document.getElementById('inputSchool').value = this.config.school;
+                document.getElementById('inputTeacher').value = this.config.teacher;
+                document.getElementById('inputStudent').value = this.config.student;
+                document.getElementById('inputLevel').value = this.config.level;
+                document.getElementById('inputClass').value = this.config.className;
+                document.getElementById('inputSubject').value = this.config.subject;
+                document.getElementById('inputTopic').value = this.config.topic;
+            },
+
+            readHomeInputs() {
+                this.config.school = document.getElementById('inputSchool').value.trim() || 'SMA Sains Nusantara';
+                this.config.teacher = document.getElementById('inputTeacher').value.trim() || 'Guru Biologi';
+                this.config.student = document.getElementById('inputStudent').value.trim() || 'Siswa Juara';
+                this.config.level = document.getElementById('inputLevel').value;
+                this.config.className = document.getElementById('inputClass').value;
+                this.config.subject = document.getElementById('inputSubject').value.trim() || 'Biologi';
+                this.config.topic = document.getElementById('inputTopic').value.trim() || 'Ekosistem';
+
+                document.getElementById('homeSubtitle').textContent =
+                    `Mata Pelajaran: ${this.config.subject} | Materi: ${this.config.topic} (${this.config.level} Kelas ${this.config.className})`;
+            },
+
+            switchScreen(screenId) {
+                const screens = ['screenHome', 'screenMap', 'screenGame', 'screenReport', 'screenTeacher'];
+                screens.forEach(s => {
+                    document.getElementById(s).classList.add('hidden');
+                });
+                document.getElementById(screenId).classList.remove('hidden');
+
+                const btnHome = document.getElementById('btnHomeNav');
+                if (screenId === 'screenHome') {
+                    btnHome.classList.add('hidden');
+                } else {
+                    btnHome.classList.remove('hidden');
+                }
+            },
+
+            startGameFlow() {
+                sound.init();
+                sound.coin();
+                this.readHomeInputs();
+                this.showMapScreen();
+            },
+
+            confirmBackHome() {
+                game.stopLoop();
+                this.switchScreen('screenHome');
+            },
+
+            showMapScreen() {
+                game.stopLoop();
+                this.switchScreen('screenMap');
+
+                document.getElementById('mapStudentName').textContent = this.config.student;
+                document.getElementById('mapStudentClass').textContent = `${this.config.level} ${this.config.className}`;
+                document.getElementById('mapTotalScore').textContent = this.score;
+                document.getElementById('mapAnsweredCount').textContent = Object.keys(this.answersLog).length;
+
+                const grid = document.getElementById('worldCardsGrid');
+                grid.innerHTML = '';
+
+                const themes = [
+                    { bg: 'from-sky-500 to-blue-700', border: 'border-sky-300', badge: 'bg-sky-200 text-sky-900' },
+                    { bg: 'from-emerald-500 to-green-800', border: 'border-emerald-300', badge: 'bg-emerald-200 text-emerald-900' },
+                    { bg: 'from-purple-500 to-indigo-800', border: 'border-purple-300', badge: 'bg-purple-200 text-purple-900' },
+                    { bg: 'from-amber-500 to-orange-800', border: 'border-amber-300', badge: 'bg-amber-200 text-amber-900' }
+                ];
+
+                this.materials.forEach((mat, idx) => {
+                    const worldQs = this.questions.filter(q => q.subtopic === mat.id);
+                    const answeredInWorld = worldQs.filter(q => this.answersLog[q.id] !== undefined).length;
+                    const isCleared = this.completedWorlds[idx];
+                    const t = themes[idx % themes.length];
+
+                    const card = document.createElement('div');
+                    card.className = `bg-gradient-to-br ${t.bg} panel-retro rounded-2xl p-4 text-white flex flex-col justify-between relative overflow-hidden`;
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full ${t.badge}">
+                                    Level ${idx + 1} • ${worldQs.length} Soal
+                                </span>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-black/40">
+                                    ${isCleared ? '✅ Selesai' : `📝 Dijawab: ${answeredInWorld}/${worldQs.length}`}
+                                </span>
+                            </div>
+                            <h3 class="font-pixel text-sm sm:text-base text-yellow-300 drop-shadow mb-1">
+                                ${mat.icon} ${mat.title}
+                            </h3>
+                            <p class="text-xs text-white/90 line-clamp-2 mb-4">
+                                ${mat.summary}
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="game.startWorld(${idx})" class="flex-1 btn-retro bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-pixel text-xs py-2.5 px-3 rounded-xl">
+                                🎮 MAINKAN LEVEL ${idx + 1}
+                            </button>
+                            <button onclick="app.showStudyModal(${idx})" class="btn-retro bg-white/90 hover:bg-white text-slate-900 font-bold text-xs py-2.5 px-3 rounded-xl">
+                                📖 Materi
+                            </button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            },
+
+            showStudyModal(activeIdx = 0) {
+                const modal = document.getElementById('modalStudy');
+                const tabs = document.getElementById('studyModalTabs');
+                const content = document.getElementById('studyModalContent');
+                modal.classList.remove('hidden');
+
+                tabs.innerHTML = '';
+                this.materials.forEach((m, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = `px-3 py-1.5 rounded-xl font-bold text-xs border-2 border-black ${idx === activeIdx ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'}`;
+                    btn.textContent = `${m.icon} ${m.title}`;
+                    btn.onclick = () => this.showStudyModal(idx);
+                    tabs.appendChild(btn);
+                });
+
+                const activeMat = this.materials[activeIdx];
+                const relatedQs = this.questions.filter(q => q.subtopic === activeMat.id);
+                const samplePreset = relatedQs[0] ? SVG_PRESETS[relatedQs[0].presetImage] : SVG_PRESETS.evaporasi;
+
+                content.innerHTML = `
+                    <div class="flex items-center gap-2 border-b-2 border-slate-300 pb-2">
+                        <span class="text-2xl">${activeMat.icon}</span>
+                        <div>
+                            <h4 class="font-bold text-base text-slate-900">${activeMat.title}</h4>
+                            <span class="text-xs text-slate-500">Mata Pelajaran: ${this.config.subject} - ${this.config.topic}</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-40 bg-white rounded-xl border border-slate-300 p-2 flex items-center justify-center">
+                        ${samplePreset ? samplePreset.svg : ''}
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium bg-amber-50 p-3 rounded-xl border border-amber-300">
+                        ${activeMat.summary}
+                    </p>
+                `;
+            },
+
+            closeStudyModal() {
+                document.getElementById('modalStudy').classList.add('hidden');
+            },
+
+            openTeacherEditor() {
+                this.readHomeInputs();
+                teacherEditor.init();
+                this.switchScreen('screenTeacher');
+            },
+
+            showReportScreen() {
+                game.stopLoop();
+                this.switchScreen('screenReport');
+
+                document.getElementById('reportSchoolHeader').textContent = this.config.school;
+                document.getElementById('repStudent').textContent = this.config.student;
+                document.getElementById('repClass').textContent = `${this.config.level} - Kelas ${this.config.className}`;
+                document.getElementById('repTeacher').textContent = this.config.teacher;
+                document.getElementById('repSubject').textContent = this.config.subject;
+                document.getElementById('repTopic').textContent = this.config.topic;
+                document.getElementById('repGameScore').textContent = `${this.score} Poin (🪙 ${this.coins} | 📘 ${this.books})`;
+
+                // Calculate Final Academic Score (0 - 100) based on 15 Questions
+                const totalQ = this.questions.length;
+                let correctCount = 0;
+                this.questions.forEach(q => {
+                    if (this.answersLog[q.id] && this.answersLog[q.id].isCorrect) {
+                        correctCount++;
+                    }
+                });
+
+                const finalScore = Math.round((correctCount / totalQ) * 100);
+                document.getElementById('reportFinalGrade').textContent = finalScore;
+
+                let predText = 'Perlu Bimbingan (D)';
+                let predClass = 'bg-rose-600 text-white';
+                if (finalScore >= 85) { predText = 'Sangat Baik (A)'; predClass = 'bg-emerald-600 text-white'; }
+                else if (finalScore >= 75) { predText = 'Baik (B)'; predClass = 'bg-sky-600 text-white'; }
+                else if (finalScore >= 60) { predText = 'Cukup (C)'; predClass = 'bg-amber-500 text-slate-950'; }
+
+                const predEl = document.getElementById('reportPredicate');
+                predEl.textContent = `${predText} • Benar ${correctCount}/${totalQ}`;
+                predEl.className = `text-xs font-bold px-2.5 py-0.5 rounded-full ${predClass}`;
+
+                // Subtopic Mastery Breakdown
+                const subGrid = document.getElementById('reportSubtopicGrid');
+                subGrid.innerHTML = '';
+                this.materials.forEach(mat => {
+                    const subQs = this.questions.filter(q => q.subtopic === mat.id);
+                    const subCorrect = subQs.filter(q => this.answersLog[q.id] && this.answersLog[q.id].isCorrect).length;
+                    const pct = subQs.length ? Math.round((subCorrect / subQs.length) * 100) : 0;
+
+                    const div = document.createElement('div');
+                    div.className = 'bg-slate-50 border-2 border-slate-800 rounded-xl p-3';
+                    div.innerHTML = `
+                        <div class="flex items-center justify-between text-xs sm:text-sm font-bold mb-1.5">
+                            <span>${mat.icon} ${mat.title}</span>
+                            <span class="text-emerald-700">${subCorrect}/${subQs.length} (${pct}%)</span>
+                        </div>
+                        <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden border border-slate-400">
+                            <div class="h-full bg-emerald-500 transition-all" style="width: ${pct}%"></div>
+                        </div>
+                    `;
+                    subGrid.appendChild(div);
+                });
+
+                // Detailed 15 Questions Review
+                const qList = document.getElementById('reportQuestionList');
+                qList.innerHTML = '';
+                this.questions.forEach((q, i) => {
+                    const log = this.answersLog[q.id];
+                    const statusBadge = !log
+                        ? `<span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-xs font-bold">Belum Dijawab</span>`
+                        : log.isCorrect
+                            ? `<span class="bg-emerald-100 text-emerald-800 border border-emerald-400 px-2 py-0.5 rounded text-xs font-bold">✅ Benar</span>`
+                            : `<span class="bg-rose-100 text-rose-800 border border-rose-400 px-2 py-0.5 rounded text-xs font-bold">❌ Salah</span>`;
+
+                    const studentAns = log ? q.options[log.selectedIndex] : '-';
+                    const correctAns = q.options[q.correct];
+
+                    const item = document.createElement('div');
+                    item.className = 'p-3 rounded-xl border-2 border-slate-300 bg-white text-xs sm:text-sm space-y-1';
+                    item.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-bold text-slate-900">Soal #${i + 1} (${q.subtopic.toUpperCase()})</span>
+                            ${statusBadge}
+                        </div>
+                        <p class="text-slate-800 font-medium">${q.question}</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1 text-xs">
+                            <div>Jawaban Siswa: <strong class="${log && log.isCorrect ? 'text-emerald-700' : 'text-rose-600'}">${studentAns}</strong></div>
+                            <div>Kunci Jawaban: <strong class="text-emerald-700">${correctAns}</strong></div>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 p-2 rounded-lg text-xs text-slate-700 mt-1">
+                            💡 <b>Penjelasan:</b> ${q.explanation}
+                        </div>
+                    `;
+                    qList.appendChild(item);
+                });
+            },
+
+            resetAndPlayAgain() {
+                this.score = 0;
+                this.coins = 0;
+                this.books = 0;
+                this.lives = 3;
+                this.completedWorlds = {};
+                this.answersLog = {};
+                this.showMapScreen();
+            },
+
+            copyReportText() {
+                const totalQ = this.questions.length;
+                let correctCount = 0;
+                this.questions.forEach(q => {
+                    if (this.answersLog[q.id] && this.answersLog[q.id].isCorrect) correctCount++;
+                });
+                const finalScore = Math.round((correctCount / totalQ) * 100);
+
+                const text = [
+                    `📊 *LAPORAN HASIL BELAJAR - PETUALANGAN SAINS*`,
+                    `🏫 Sekolah: ${this.config.school}`,
+                    `👩‍🏫 Guru: ${this.config.teacher}`,
+                    `🧑‍🎓 Siswa: ${this.config.student} (${this.config.level} - ${this.config.className})`,
+                    `📘 Mapel: ${this.config.subject} - ${this.config.topic}`,
+                    `----------------------------------------`,
+                    `🏆 *NILAI AKHIR: ${finalScore} / 100*`,
+                    `✅ Jawaban Benar: ${correctCount} dari ${totalQ} Soal`,
+                    `⭐ Total Skor Game: ${this.score} Poin`,
+                    `🪙 Koin Terkumpul: ${this.coins} | 📘 Buku Sains: ${this.books}`
+                ].join('\n');
+
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    game.showDialog('📋', 'LAPORAN DISALIN!', 'Ringkasan laporan hasil belajar berhasil disalin ke clipboard. Siap ditempel ke WhatsApp atau dokumen Guru!', [
+                        { label: 'Oke, Mengerti', color: 'bg-emerald-500 text-white', action: () => game.closeDialog() }
+                    ]);
+                } catch (e) {}
+                document.body.removeChild(textarea);
+            }
+        };
+
+        /**********************************************************
+         * 5. MARIO-STYLE 2D PLATFORMER ENGINE (HTML5 CANVAS)
+         **********************************************************/
+        const game = {
+            canvas: null,
+            ctx: null,
+            animId: null,
+            isRunning: false,
+            isPaused: false,
+
+            worldIndex: 0,
+            cameraX: 0,
+            worldWidth: 3200,
+            groundY: 420,
+
+            keys: { left: false, right: false, jump: false },
+
+            player: {
+                x: 80,
+                y: 250,
+                w: 38,
+                h: 48,
+                vx: 0,
+                vy: 0,
+                speed: 5.2,
+                jumpForce: -13.8,
+                onGround: false,
+                facing: 1,
+                invincibleTimer: 0,
+                walkFrame: 0
+            },
+
+            platforms: [],
+            questionBlocks: [],
+            coinsList: [],
+            booksList: [],
+            enemies: [],
+            particles: [],
+            scenery: [],
+            flagPole: { x: 3000, reached: false },
+            activeQuestionBlock: null,
+
+            initControls() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+
+                // Keyboard Listeners
+                window.addEventListener('keydown', (e) => {
+                    if (!this.isRunning || this.isPaused) return;
+                    if (['ArrowLeft', 'KeyA'].includes(e.code)) this.keys.left = true;
+                    if (['ArrowRight', 'KeyD'].includes(e.code)) this.keys.right = true;
+                    if (['ArrowUp', 'KeyW', 'Space'].includes(e.code)) {
+                        this.triggerJump();
+                    }
+                });
+
+                window.addEventListener('keyup', (e) => {
+                    if (['ArrowLeft', 'KeyA'].includes(e.code)) this.keys.left = false;
+                    if (['ArrowRight', 'KeyD'].includes(e.code)) this.keys.right = false;
+                    if (['ArrowUp', 'KeyW', 'Space'].includes(e.code)) this.keys.jump = false;
+                });
+
+                // Touch & Mouse Pad Listeners for Mobile
+                const bindTouch = (btnId, keyName, isJumpBtn = false) => {
+                    const el = document.getElementById(btnId);
+                    const start = (ev) => {
+                        ev.preventDefault();
+                        sound.init();
+                        el.classList.add('active');
+                        if (isJumpBtn) this.triggerJump();
+                        else this.keys[keyName] = true;
+                    };
+                    const end = (ev) => {
+                        ev.preventDefault();
+                        el.classList.remove('active');
+                        if (!isJumpBtn) this.keys[keyName] = false;
+                    };
+                    el.addEventListener('touchstart', start, { passive: false });
+                    el.addEventListener('touchend', end, { passive: false });
+                    el.addEventListener('touchcancel', end, { passive: false });
+                    el.addEventListener('mousedown', start);
+                    el.addEventListener('mouseup', end);
+                    el.addEventListener('mouseleave', end);
+                };
+
+                bindTouch('btnLeft', 'left', false);
+                bindTouch('btnRight', 'right', false);
+                bindTouch('btnJump', 'jump', true);
+
+                window.addEventListener('resize', () => this.resizeCanvas());
+            },
+
+            resizeCanvas() {
+                if (!this.canvas) return;
+                const container = document.getElementById('canvasContainer');
+                this.canvas.width = container.clientWidth || 800;
+                this.canvas.height = container.clientHeight || 480;
+                this.groundY = this.canvas.height - 95;
+            },
+
+            triggerJump() {
+                if (!this.isRunning || this.isPaused) return;
+                if (this.player.onGround) {
+                    this.player.vy = this.player.jumpForce;
+                    this.player.onGround = false;
+                    sound.jump();
+                    this.spawnParticles(this.player.x + this.player.w / 2, this.player.y + this.player.h, '#ffffff', 6);
+                }
+            },
+
+            startWorld(idx) {
+                sound.init();
+                this.worldIndex = idx;
+                app.switchScreen('screenGame');
+                this.resizeCanvas();
+
+                if (app.lives <= 0) app.lives = 3;
+
+                this.buildLevelGeometry(idx);
+                this.updateHUD();
+
+                this.isRunning = true;
+                this.isPaused = false;
+                sound.startBGM();
+
+                if (this.animId) cancelAnimationFrame(this.animId);
+                this.loop();
+            },
+
+            stopLoop() {
+                this.isRunning = false;
+                sound.stopBGM();
+                if (this.animId) {
+                    cancelAnimationFrame(this.animId);
+                    this.animId = null;
+                }
+            },
+
+            pauseToMap() {
+                this.stopLoop();
+                app.showMapScreen();
+            },
+
+            openStudyInGame() {
+                app.showStudyModal(this.worldIndex);
+            },
+
+            buildLevelGeometry(worldIdx) {
+                const mat = app.materials[worldIdx];
+                const worldQs = app.questions.filter(q => q.subtopic === mat.id);
+                const gY = this.groundY;
+
+                this.worldWidth = 2850;
+                this.cameraX = 0;
+
+                // Reset player
+                this.player.x = 70;
+                this.player.y = gY - 80;
+                this.player.vx = 0;
+                this.player.vy = 0;
+                this.player.invincibleTimer = 0;
+
+                this.platforms = [];
+                this.questionBlocks = [];
+                this.coinsList = [];
+                this.booksList = [];
+                this.enemies = [];
+                this.particles = [];
+                this.scenery = [];
+
+                // Decorative Clouds & Hills
+                for (let i = 0; i < 14; i++) {
+                    this.scenery.push({
+                        x: i * 240 + 50,
+                        y: 55 + (i % 3) * 35,
+                        type: 'cloud',
+                        scale: 0.8 + (i % 2) * 0.35
+                    });
+                }
+
+                // Brick / Pipe Platforms
+                const platCoords = [
+                    { x: 320, y: gY - 95, w: 130, h: 24, type: 'brick' },
+                    { x: 520, y: gY - 65, w: 56, h: 65, type: 'pipe' },
+                    { x: 750, y: gY - 105, w: 150, h: 24, type: 'brick' },
+                    { x: 1120, y: gY - 75, w: 56, h: 75, type: 'pipe' },
+                    { x: 1300, y: gY - 110, w: 160, h: 24, type: 'brick' },
+                    { x: 1680, y: gY - 95, w: 140, h: 24, type: 'brick' },
+                    { x: 1960, y: gY - 70, w: 56, h: 70, type: 'pipe' },
+                    { x: 2150, y: gY - 105, w: 160, h: 24, type: 'brick' }
+                ];
+                this.platforms = platCoords;
+
+                // Question Blocks [?] evenly spaced across the level
+                const qPositions = [410, 960, 1520, 2060];
+                worldQs.forEach((qObj, i) => {
+                    const bx = qPositions[i] || (400 + i * 520);
+                    const by = gY - 135;
+                    const alreadyAnswered = app.answersLog[qObj.id] !== undefined;
+                    this.questionBlocks.push({
+                        x: bx,
+                        y: by,
+                        w: 46,
+                        h: 46,
+                        question: qObj,
+                        answered: alreadyAnswered,
+                        bounceOffset: 0
+                    });
+                });
+
+                // Coins & Knowledge Books (Benda Pengetahuan)
+                for (let i = 0; i < 18; i++) {
+                    this.coinsList.push({
+                        x: 240 + i * 130,
+                        y: (i % 2 === 0) ? gY - 55 : gY - 155,
+                        r: 13,
+                        collected: false
+                    });
+                }
+
+                const bookLabels = ['H₂O', 'CO₂', 'N₂', 'SO₄²⁻', 'ATP', 'O₂'];
+                for (let i = 0; i < 6; i++) {
+                    this.booksList.push({
+                        x: 365 + i * 390,
+                        y: gY - 165,
+                        w: 30,
+                        h: 30,
+                        label: bookLabels[i % bookLabels.length],
+                        collected: false
+                    });
+                }
+
+                // Enemies (Polutan / Bakteri Jahat / Asap)
+                const enemySpawns = [
+                    { x: 650, minX: 590, maxX: 890, name: 'Polutan' },
+                    { x: 1020, minX: 920, maxX: 1100, name: 'Emisi' },
+                    { x: 1460, minX: 1250, maxX: 1640, name: 'Limbah' },
+                    { x: 1840, minX: 1690, maxX: 1940, name: 'Toksin' },
+                    { x: 2320, minX: 2050, maxX: 2520, name: 'Polutan' }
+                ];
+                enemySpawns.forEach(es => {
+                    this.enemies.push({
+                        x: es.x,
+                        y: gY - 38,
+                        w: 38,
+                        h: 38,
+                        vx: 1.8,
+                        minX: es.minX,
+                        maxX: es.maxX,
+                        alive: true,
+                        name: es.name
+                    });
+                });
+
+                // Finish Flagpole
+                this.flagPole = {
+                    x: 2640,
+                    y: gY - 220,
+                    h: 220,
+                    reached: false
+                };
+            },
+
+            showToast(msg) {
+                const t = document.getElementById('gameToast');
+                t.textContent = msg;
+                t.classList.remove('hidden');
+                clearTimeout(this.toastTimeout);
+                this.toastTimeout = setTimeout(() => t.classList.add('hidden'), 1800);
+            },
+
+            spawnParticles(x, y, color, count = 8) {
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x,
+                        y,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.8) * 6,
+                        life: 25,
+                        color
+                    });
+                }
+            },
+
+            updateHUD() {
+                document.getElementById('hudLives').textContent = '❤️'.repeat(Math.max(0, app.lives)) || '💔';
+                document.getElementById('hudCoins').textContent = app.coins;
+                document.getElementById('hudBooks').textContent = app.books;
+                document.getElementById('hudScore').textContent = app.score;
+
+                const mat = app.materials[this.worldIndex];
+                const worldQs = app.questions.filter(q => q.subtopic === mat.id);
+                const ansCount = worldQs.filter(q => app.answersLog[q.id] !== undefined).length;
+
+                document.getElementById('hudWorldName').textContent = `${mat.icon} ${mat.title}`;
+                document.getElementById('hudQuestionCounter').textContent = `Soal: ${ansCount}/${worldQs.length}`;
+            },
+
+            updatePhysics() {
+                const p = this.player;
+                const gY = this.groundY;
+
+                // Horizontal Movement
+                if (this.keys.left) {
+                    p.vx = -p.speed;
+                    p.facing = -1;
+                    p.walkFrame += 0.2;
+                } else if (this.keys.right) {
+                    p.vx = p.speed;
+                    p.facing = 1;
+                    p.walkFrame += 0.2;
+                } else {
+                    p.vx *= 0.78;
+                    if (Math.abs(p.vx) < 0.1) p.vx = 0;
+                }
+
+                p.x += p.vx;
+                if (p.x < 10) p.x = 10;
+                if (p.x > this.worldWidth - p.w) p.x = this.worldWidth - p.w;
+
+                // Horizontal Collision with Pipes/Platforms
+                this.platforms.forEach(plat => {
+                    if (this.rectOverlap(p.x, p.y, p.w, p.h, plat.x, plat.y, plat.w, plat.h)) {
+                        if (p.vx > 0) p.x = plat.x - p.w;
+                        else if (p.vx < 0) p.x = plat.x + plat.w;
+                    }
+                });
+
+                // Gravity & Vertical Movement
+                const prevY = p.y;
+                p.vy += 0.65;
+                if (p.vy > 14) p.vy = 14;
+                p.y += p.vy;
+                p.onGround = false;
+
+                // Ground Collision
+                if (p.y + p.h >= gY) {
+                    p.y = gY - p.h;
+                    p.vy = 0;
+                    p.onGround = true;
+                }
+
+                // Platform Vertical Collision
+                this.platforms.forEach(plat => {
+                    if (this.rectOverlap(p.x, p.y, p.w, p.h, plat.x, plat.y, plat.w, plat.h)) {
+                        if (p.vy > 0 && prevY + p.h <= plat.y + 14) {
+                            p.y = plat.y - p.h;
+                            p.vy = 0;
+                            p.onGround = true;
+                        } else if (p.vy < 0 && prevY >= plat.y + plat.h - 12) {
+                            p.y = plat.y + plat.h;
+                            p.vy = 0;
+                        }
+                    }
+                });
+
+                // Question Blocks [?] Collision (Hit from below or touch!)
+                this.questionBlocks.forEach(qb => {
+                    if (qb.bounceOffset > 0) qb.bounceOffset -= 1;
+
+                    if (this.rectOverlap(p.x, p.y, p.w, p.h, qb.x, qb.y, qb.w, qb.h)) {
+                        // Hitting from underneath
+                        if (p.vy < 0 && prevY >= qb.y + qb.h - 14) {
+                            p.y = qb.y + qb.h;
+                            p.vy = 2;
+                            qb.bounceOffset = 8;
+                            this.triggerQuestionBlock(qb);
+                        } else if (p.vy > 0 && prevY + p.h <= qb.y + 14) {
+                            p.y = qb.y - p.h;
+                            p.vy = 0;
+                            p.onGround = true;
+                            if (!qb.answered) {
+                                qb.bounceOffset = 6;
+                                this.triggerQuestionBlock(qb);
+                            }
+                        } else if (!qb.answered) {
+                            qb.bounceOffset = 6;
+                            this.triggerQuestionBlock(qb);
+                        }
+                    }
+                });
+
+                // Collect Coins
+                this.coinsList.forEach(c => {
+                    if (!c.collected) {
+                        const dx = (p.x + p.w / 2) - c.x;
+                        const dy = (p.y + p.h / 2) - c.y;
+                        if (Math.hypot(dx, dy) < 30) {
+                            c.collected = true;
+                            app.coins++;
+                            app.score += 10;
+                            sound.coin();
+                            this.spawnParticles(c.x, c.y, '#FBD000', 8);
+                            this.updateHUD();
+                        }
+                    }
+                });
+
+                // Collect Science Books (Benda Pengetahuan)
+                this.booksList.forEach(b => {
+                    if (!b.collected && this.rectOverlap(p.x, p.y, p.w, p.h, b.x, b.y, b.w, b.h)) {
+                        b.collected = true;
+                        app.books++;
+                        app.score += 25;
+                        sound.book();
+                        this.showToast(`📘 Benda Pengetahuan [${b.label}] +25 Poin!`);
+                        this.spawnParticles(b.x + 15, b.y + 15, '#38bdf8', 12);
+                        this.updateHUD();
+                    }
+                });
+
+                // Update Enemies
+                if (p.invincibleTimer > 0) p.invincibleTimer--;
+
+                this.enemies.forEach(en => {
+                    if (!en.alive) return;
+                    en.x += en.vx;
+                    if (en.x < en.minX || en.x > en.maxX) en.vx *= -1;
+
+                    if (this.rectOverlap(p.x, p.y, p.w, p.h, en.x, en.y, en.w, en.h)) {
+                        // Player stomps enemy from top
+                        if (p.vy > 0 && prevY + p.h <= en.y + 18) {
+                            en.alive = false;
+                            p.vy = -9.5;
+                            app.score += 30;
+                            sound.stomp();
+                            this.showToast(`💥 Musuh ${en.name} Dikalahkan! +30 Poin`);
+                            this.spawnParticles(en.x + 18, en.y + 18, '#f43f5e', 12);
+                            this.updateHUD();
+                        } else if (p.invincibleTimer <= 0) {
+                            // Player hurt by enemy
+                            p.invincibleTimer = 75;
+                            p.vy = -7;
+                            app.lives--;
+                            sound.wrong();
+                            this.showToast('⚠️ Terkena Polutan! Hindari atau injak dari atas!');
+                            this.updateHUD();
+                            if (app.lives <= 0) {
+                                this.handleOutOfLives();
+                            }
+                        }
+                    }
+                });
+
+                // Check Flagpole at End of World
+                if (!this.flagPole.reached && p.x + p.w >= this.flagPole.x) {
+                    this.handleTouchFlagpole();
+                }
+
+                // Update Particles
+                this.particles.forEach(pt => {
+                    pt.x += pt.vx;
+                    pt.y += pt.vy;
+                    pt.life--;
+                });
+                this.particles = this.particles.filter(pt => pt.life > 0);
+
+                // Smooth Camera Follow
+                const targetCam = p.x - this.canvas.width * 0.32;
+                this.cameraX += (targetCam - this.cameraX) * 0.12;
+                if (this.cameraX < 0) this.cameraX = 0;
+                if (this.cameraX > this.worldWidth - this.canvas.width) {
+                    this.cameraX = Math.max(0, this.worldWidth - this.canvas.width);
+                }
+            },
+
+            rectOverlap(x1, y1, w1, h1, x2, y2, w2, h2) {
+                return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+            },
+
+            triggerQuestionBlock(qb) {
+                if (qb.answered) {
+                    this.showToast('✅ Soal pada blok ini sudah kamu jawab!');
+                    return;
+                }
+                sound.questionBlock();
+                this.isPaused = true;
+                this.keys.left = false;
+                this.keys.right = false;
+                this.activeQuestionBlock = qb;
+                this.openQuestionModal(qb.question);
+            },
+
+            openQuestionModal(q) {
+                const modal = document.getElementById('modalQuestion');
+                modal.classList.remove('hidden');
+
+                const mat = app.materials.find(m => m.id === q.subtopic) || app.materials[0];
+                document.getElementById('qModalBadge').textContent = `${mat.icon} ${mat.title} • Soal #${q.id}`;
+                document.getElementById('qModalText').textContent = q.question;
+
+                // Render Image / SVG Diagram
+                const imgBox = document.getElementById('qModalImageContainer');
+                const capBox = document.getElementById('qModalCaption');
+                if (q.customImageUrl && q.customImageUrl.trim() !== '') {
+                    imgBox.innerHTML = `<img src="${q.customImageUrl}" alt="Ilustrasi Soal" class="max-h-full max-w-full object-contain" onerror="this.src='https://placehold.co/400x180/e2e8f0/1e293b?text=Gambar+Soal+Sains'">`;
+                    capBox.textContent = 'Ilustrasi Objek Sains (Kustom Guru)';
+                } else {
+                    const preset = SVG_PRESETS[q.presetImage] || SVG_PRESETS.evaporasi;
+                    imgBox.innerHTML = preset.svg;
+                    capBox.textContent = `Ilustrasi Objek: ${preset.label}`;
+                }
+
+                // Hide feedback initially
+                const fb = document.getElementById('qModalFeedback');
+                fb.classList.add('hidden');
+
+                // Render Option Buttons (A, B, C, D, E)
+                const optContainer = document.getElementById('qModalOptions');
+                optContainer.innerHTML = '';
+                const letters = ['A', 'B', 'C', 'D', 'E'];
+
+                q.options.forEach((optText, idx) => {
+                    const btn = document.createElement('button');
+                    const spanCol = idx === 4 ? 'sm:col-span-2' : '';
+                    btn.className = `btn-retro bg-slate-100 hover:bg-amber-200 text-slate-900 font-bold text-xs sm:text-sm p-3 rounded-xl text-left flex items-start gap-2.5 ${spanCol}`;
+                    btn.innerHTML = `
+                        <span class="bg-slate-900 text-yellow-400 font-pixel text-xs px-2 py-1 rounded shrink-0">${letters[idx] || 'E'}</span>
+                        <span class="leading-snug">${optText}</span>
+                    `;
+                    btn.onclick = () => this.submitAnswer(q, idx);
+                    optContainer.appendChild(btn);
+                });
+            },
+
+            submitAnswer(q, selectedIdx) {
+                const isCorrect = selectedIdx === Number(q.correct);
+                app.answersLog[q.id] = { selectedIndex: selectedIdx, isCorrect };
+
+                if (this.activeQuestionBlock) {
+                    this.activeQuestionBlock.answered = true;
+                }
+
+                // Disable option buttons & highlight correct/wrong
+                const optButtons = document.getElementById('qModalOptions').children;
+                for (let i = 0; i < optButtons.length; i++) {
+                    optButtons[i].onclick = null;
+                    const spanCol = i === 4 ? 'sm:col-span-2' : '';
+                    if (i === Number(q.correct)) {
+                        optButtons[i].className = `btn-retro bg-emerald-500 text-white font-bold text-xs sm:text-sm p-3 rounded-xl text-left flex items-start gap-2.5 ${spanCol}`;
+                    } else if (i === selectedIdx && !isCorrect) {
+                        optButtons[i].className = `btn-retro bg-rose-500 text-white font-bold text-xs sm:text-sm p-3 rounded-xl text-left flex items-start gap-2.5 ${spanCol}`;
+                    } else {
+                        optButtons[i].className = `btn-retro bg-slate-200 opacity-60 text-slate-600 font-bold text-xs sm:text-sm p-3 rounded-xl text-left flex items-start gap-2.5 ${spanCol}`;
+                    }
+                }
+
+                const fb = document.getElementById('qModalFeedback');
+                const fbTitle = document.getElementById('qModalFeedbackTitle');
+                const fbExp = document.getElementById('qModalExplanation');
+                fb.classList.remove('hidden');
+
+                if (isCorrect) {
+                    app.score += 100;
+                    sound.correct();
+                    fb.className = 'rounded-xl p-4 border-3 border-black mb-2 bg-emerald-100 text-emerald-950';
+                    fbTitle.innerHTML = '🎉 JAWABAN BENAR! (+100 SKOR)';
+                } else {
+                    app.lives--;
+                    sound.wrong();
+                    fb.className = 'rounded-xl p-4 border-3 border-black mb-2 bg-rose-100 text-rose-950';
+                    fbTitle.innerHTML = `💔 JAWABAN KURANG TEPAT! (-1 NYAWA) • Kunci: ${['A','B','C','D','E'][q.correct]}`;
+                }
+
+                fbExp.innerHTML = `<b>Penjelasan Sains:</b> ${q.explanation}`;
+                this.updateHUD();
+            },
+
+            closeQuestionModal() {
+                document.getElementById('modalQuestion').classList.add('hidden');
+                this.isPaused = false;
+                if (app.lives <= 0) {
+                    this.handleOutOfLives();
+                }
+            },
+
+            handleOutOfLives() {
+                this.isPaused = true;
+                sound.wrong();
+                this.showDialog(
+                    '💔',
+                    'NYAWA HABIS!',
+                    'Jangan menyerah! Dalam sains, setiap percobaan adalah langkah menuju penemuan. Nyawamu akan dipulihkan kembali agar kamu bisa melanjutkan petualangan.',
+                    [
+                        {
+                            label: '🔄 Lanjutkan Level Ini (Pulihkan ❤️❤️❤️)',
+                            color: 'bg-emerald-500 text-white',
+                            action: () => {
+                                app.lives = 3;
+                                this.player.x = Math.max(70, this.player.x - 120);
+                                this.player.y = this.groundY - 90;
+                                this.updateHUD();
+                                this.closeDialog();
+                                this.isPaused = false;
+                            }
+                        },
+                        {
+                            label: '🗺️ Kembali ke Peta Level',
+                            color: 'bg-amber-400 text-slate-950',
+                            action: () => {
+                                app.lives = 3;
+                                this.closeDialog();
+                                this.pauseToMap();
+                            }
+                        }
+                    ]
+                );
+            },
+
+            handleTouchFlagpole() {
+                const mat = app.materials[this.worldIndex];
+                const worldQs = app.questions.filter(q => q.subtopic === mat.id);
+                const unanswered = worldQs.filter(q => app.answersLog[q.id] === undefined);
+
+                if (unanswered.length > 0) {
+                    this.player.x = this.flagPole.x - 60;
+                    this.showToast(`⚠️ Masih ada ${unanswered.length} Blok Soal [?] yang belum dijawab di level ini!`);
+                    return;
+                }
+
+                this.flagPole.reached = true;
+                this.isPaused = true;
+                app.completedWorlds[this.worldIndex] = true;
+                app.score += 150;
+                this.updateHUD();
+                sound.levelWin();
+
+                const isLastWorld = this.worldIndex >= app.materials.length - 1;
+                const totalAnswered = Object.keys(app.answersLog).length;
+
+                this.showDialog(
+                    '🏁',
+                    `DUNIA ${this.worldIndex + 1} SELESAI!`,
+                    `Luar biasa, ${app.config.student}! Kamu telah menaklukkan ${mat.title} dan mendapatkan bonus +150 Poin! Total soal terjawab: ${totalAnswered}/15.`,
+                    [
+                        !isLastWorld ? {
+                            label: `▶️ Lanjut ke Dunia ${this.worldIndex + 2}`,
+                            color: 'bg-emerald-500 text-white',
+                            action: () => {
+                                this.closeDialog();
+                                this.startWorld(this.worldIndex + 1);
+                            }
+                        } : null,
+                        {
+                            label: '📊 Lihat Nilai & Rapor Hasil Belajar',
+                            color: 'bg-amber-400 text-slate-950',
+                            action: () => {
+                                this.closeDialog();
+                                app.showReportScreen();
+                            }
+                        },
+                        {
+                            label: '🗺️ Pilih Level di Peta',
+                            color: 'bg-sky-400 text-slate-950',
+                            action: () => {
+                                this.closeDialog();
+                                app.showMapScreen();
+                            }
+                        }
+                    ].filter(Boolean)
+                );
+            },
+
+            showDialog(icon, title, msg, buttons) {
+                const modal = document.getElementById('modalDialog');
+                document.getElementById('dialogIcon').textContent = icon;
+                document.getElementById('dialogTitle').textContent = title;
+                document.getElementById('dialogMessage').textContent = msg;
+
+                const btnBox = document.getElementById('dialogButtons');
+                btnBox.innerHTML = '';
+                buttons.forEach(b => {
+                    const btn = document.createElement('button');
+                    btn.className = `btn-retro ${b.color} font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl`;
+                    btn.textContent = b.label;
+                    btn.onclick = b.action;
+                    btnBox.appendChild(btn);
+                });
+
+                modal.classList.remove('hidden');
+            },
+
+            closeDialog() {
+                document.getElementById('modalDialog').classList.add('hidden');
+            },
+
+            renderScene() {
+                const ctx = this.ctx;
+                const W = this.canvas.width;
+                const H = this.canvas.height;
+                const gY = this.groundY;
+
+                // World Theme Palettes
+                const palettes = [
+                    { skyTop: '#38bdf8', skyBot: '#bae6fd', groundTop: '#22c55e', groundDirt: '#854d0e', hill: '#0284c7' }, // Air
+                    { skyTop: '#34d399', skyBot: '#d1fae5', groundTop: '#15803d', groundDirt: '#713f12', hill: '#059669' }, // Karbon
+                    { skyTop: '#818cf8', skyBot: '#e0e7ff', groundTop: '#4ade80', groundDirt: '#581c87', hill: '#4f46e5' }, // Nitrogen
+                    { skyTop: '#fbbf24', skyBot: '#fef3c7', groundTop: '#ca8a04', groundDirt: '#451a03', hill: '#b45309' }  // Sulfur
+                ];
+                const pal = palettes[this.worldIndex % palettes.length];
+
+                // 1. Sky Gradient
+                const grad = ctx.createLinearGradient(0, 0, 0, gY);
+                grad.addColorStop(0, pal.skyTop);
+                grad.addColorStop(1, pal.skyBot);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+
+                ctx.save();
+                ctx.translate(-this.cameraX, 0);
+
+                // 2. Background Mountains / Hills
+                for (let i = 0; i < 10; i++) {
+                    const hx = i * 360 + 80;
+                    ctx.fillStyle = pal.hill;
+                    ctx.globalAlpha = 0.28;
+                    ctx.beginPath();
+                    ctx.arc(hx, gY, 130, Math.PI, 0);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+
+                // 3. Clouds
+                this.scenery.forEach(sc => {
+                    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+                    ctx.beginPath();
+                    ctx.arc(sc.x, sc.y, 22 * sc.scale, 0, Math.PI * 2);
+                    ctx.arc(sc.x + 22 * sc.scale, sc.y - 6, 26 * sc.scale, 0, Math.PI * 2);
+                    ctx.arc(sc.x + 45 * sc.scale, sc.y, 20 * sc.scale, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // 4. Ground Tiles
+                ctx.fillStyle = pal.groundDirt;
+                ctx.fillRect(0, gY, this.worldWidth, H - gY);
+                ctx.fillStyle = pal.groundTop;
+                ctx.fillRect(0, gY, this.worldWidth, 18);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, gY);
+                ctx.lineTo(this.worldWidth, gY);
+                ctx.stroke();
+
+                // 5. Platforms (Bricks & Mario Pipes)
+                this.platforms.forEach(plat => {
+                    if (plat.type === 'pipe') {
+                        ctx.fillStyle = '#22c55e';
+                        ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+                        // Pipe rim
+                        ctx.fillStyle = '#4ade80';
+                        ctx.fillRect(plat.x - 4, plat.y, plat.w + 8, 18);
+                        ctx.strokeRect(plat.x - 4, plat.y, plat.w + 8, 18);
+                    } else {
+                        ctx.fillStyle = '#b45309';
+                        ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+                        // Brick lines
+                        ctx.beginPath();
+                        for (let bx = plat.x + 26; bx < plat.x + plat.w; bx += 26) {
+                            ctx.moveTo(bx, plat.y);
+                            ctx.lineTo(bx, plat.y + plat.h);
+                        }
+                        ctx.stroke();
+                    }
+                });
+
+                // 6. Question Blocks [?]
+                this.questionBlocks.forEach((qb, idx) => {
+                    const drawY = qb.y - qb.bounceOffset;
+                    ctx.fillStyle = qb.answered ? '#94a3b8' : '#facc15';
+                    ctx.fillRect(qb.x, drawY, qb.w, qb.h);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(qb.x, drawY, qb.w, qb.h);
+
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 20px "Press Start 2P", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(qb.answered ? '✓' : '?', qb.x + qb.w / 2, drawY + 31);
+
+                    // Floating label above block
+                    ctx.font = 'bold 11px Fredoka, sans-serif';
+                    ctx.fillStyle = qb.answered ? '#334155' : '#dc2626';
+                    ctx.fillText(`SOAL #${qb.question.id}`, qb.x + qb.w / 2, drawY - 8);
+                });
+
+                // 7. Coins
+                this.coinsList.forEach(c => {
+                    if (c.collected) return;
+                    ctx.fillStyle = '#FBD000';
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                    ctx.fillStyle = '#b45309';
+                    ctx.font = 'bold 11px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('$', c.x, c.y + 4);
+                });
+
+                // 8. Science Books (Benda Pengetahuan)
+                this.booksList.forEach(b => {
+                    if (b.collected) return;
+                    ctx.fillStyle = '#0284c7';
+                    ctx.fillRect(b.x, b.y, b.w, b.h);
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(b.x, b.y, b.w, b.h);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 10px Fredoka, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(b.label, b.x + b.w / 2, b.y + 19);
+                });
+
+                // 9. Enemies
+                this.enemies.forEach(en => {
+                    if (!en.alive) return;
+                    ctx.fillStyle = '#dc2626';
+                    ctx.beginPath();
+                    ctx.arc(en.x + en.w / 2, en.y + en.h / 2, en.w / 2, Math.PI, 0);
+                    ctx.lineTo(en.x + en.w, en.y + en.h);
+                    ctx.lineTo(en.x, en.y + en.h);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+
+                    // Angry eyes
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(en.x + 7, en.y + 12, 7, 7);
+                    ctx.fillRect(en.x + 23, en.y + 12, 7, 7);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(en.x + 9, en.y + 14, 3, 3);
+                    ctx.fillRect(en.x + 25, en.y + 14, 3, 3);
+                });
+
+                // 10. Finish Flagpole
+                const fp = this.flagPole;
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillRect(fp.x, fp.y, 8, fp.h);
+                ctx.strokeStyle = '#000';
+                ctx.strokeRect(fp.x, fp.y, 8, fp.h);
+                // Flag banner
+                ctx.fillStyle = '#16a34a';
+                ctx.beginPath();
+                ctx.moveTo(fp.x + 8, fp.y + 12);
+                ctx.lineTo(fp.x + 68, fp.y + 32);
+                ctx.lineTo(fp.x + 8, fp.y + 52);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.arc(fp.x + 4, fp.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // 11. Player Character (Mario-Style Young Scientist)
+                const p = this.player;
+                if (p.invincibleTimer % 4 < 2) {
+                    ctx.save();
+                    ctx.translate(p.x + p.w / 2, p.y + p.h / 2);
+                    ctx.scale(p.facing, 1);
+
+                    // Overalls / Body
+                    ctx.fillStyle = '#2563eb';
+                    ctx.fillRect(-14, 2, 28, 18);
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeRect(-14, 2, 28, 18);
+
+                    // Shirt
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(-16, -4, 32, 12);
+                    ctx.strokeRect(-16, -4, 32, 12);
+
+                    // Head
+                    ctx.fillStyle = '#fde68a';
+                    ctx.fillRect(-12, -20, 24, 18);
+                    ctx.strokeRect(-12, -20, 24, 18);
+
+                    // Red Cap
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fillRect(-14, -24, 30, 7);
+                    ctx.strokeRect(-14, -24, 30, 7);
+
+                    // Eye
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(4, -15, 4, 5);
+
+                    // Shoes
+                    const legSwing = Math.sin(p.walkFrame) * 4;
+                    ctx.fillStyle = '#78350f';
+                    ctx.fillRect(-13 + legSwing, 18, 11, 6);
+                    ctx.fillRect(2 - legSwing, 18, 11, 6);
+
+                    ctx.restore();
+                }
+
+                // 12. Particles
+                this.particles.forEach(pt => {
+                    ctx.fillStyle = pt.color;
+                    ctx.fillRect(pt.x, pt.y, 5, 5);
+                });
+
+                ctx.restore();
+            },
+
+            loop() {
+                if (!this.isRunning) return;
+                if (!this.isPaused) {
+                    this.updatePhysics();
+                }
+                this.renderScene();
+                this.animId = requestAnimationFrame(() => this.loop());
+            }
+        };
+
+        /**********************************************************
+         * 6. TEACHER CUSTOMIZATION & EDITOR ENGINE
+         **********************************************************/
+        const teacherEditor = {
+            init() {
+                this.renderQuestionEditorList();
+                this.renderMaterialEditorList();
+            },
+
+            switchTab(tab) {
+                const qTab = document.getElementById('teacherTabQuestions');
+                const mTab = document.getElementById('teacherTabMaterials');
+                const btnQ = document.getElementById('tabBtnQuestions');
+                const btnM = document.getElementById('tabBtnMaterials');
+
+                if (tab === 'questions') {
+                    qTab.classList.remove('hidden');
+                    mTab.classList.add('hidden');
+                    btnQ.className = 'px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-900 text-yellow-400 border-2 border-black';
+                    btnM.className = 'px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-200 text-slate-700 border-2 border-transparent';
+                } else {
+                    qTab.classList.add('hidden');
+                    mTab.classList.remove('hidden');
+                    btnM.className = 'px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-900 text-yellow-400 border-2 border-black';
+                    btnQ.className = 'px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-slate-200 text-slate-700 border-2 border-transparent';
+                }
+            },
+
+            renderQuestionEditorList() {
+                const filter = document.getElementById('filterSubtopicSelect').value;
+                const container = document.getElementById('editorQuestionsContainer');
+                container.innerHTML = '';
+
+                const presetOptionsHtml = Object.keys(SVG_PRESETS).map(k =>
+                    `<option value="${k}">${SVG_PRESETS[k].label}</option>`
+                ).join('');
+
+                app.questions.forEach((q, idx) => {
+                    if (filter !== 'ALL' && q.subtopic !== filter) return;
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-50 border-2 border-slate-800 rounded-xl p-4 space-y-3 text-xs sm:text-sm';
+                    card.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-300 pb-2">
+                            <span class="font-pixel text-xs bg-slate-900 text-yellow-400 px-2.5 py-1 rounded">NOMOR #${idx + 1}</span>
+                            <div class="flex items-center gap-2">
+                                <label class="font-bold">Sub-Materi:</label>
+                                <select onchange="teacherEditor.updateQField(${idx}, 'subtopic', this.value)" class="px-2 py-1 rounded border border-slate-700 font-bold bg-white">
+                                    <option value="air" ${q.subtopic === 'air' ? 'selected' : ''}>💧 Siklus Air</option>
+                                    <option value="karbon" ${q.subtopic === 'karbon' ? 'selected' : ''}>🌿 Siklus Karbon</option>
+                                    <option value="nitrogen" ${q.subtopic === 'nitrogen' ? 'selected' : ''}>⚡ Siklus Nitrogen</option>
+                                    <option value="sulfur" ${q.subtopic === 'sulfur' ? 'selected' : ''}>🌋 Siklus Sulfur & Belerang</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Pertanyaan Soal:</label>
+                            <textarea rows="2" oninput="teacherEditor.updateQField(${idx}, 'question', this.value)" class="w-full p-2 rounded-lg border border-slate-400 font-medium">${q.question}</textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Ilustrasi Gambar Bawaan:</label>
+                                <select onchange="teacherEditor.updateQField(${idx}, 'presetImage', this.value)" class="w-full p-2 rounded-lg border border-slate-400 bg-white font-semibold">
+                                    ${Object.keys(SVG_PRESETS).map(k => `<option value="${k}" ${q.presetImage === k ? 'selected' : ''}>${SVG_PRESETS[k].label}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Atau URL Gambar Kustom (Opsional):</label>
+                                <input type="text" placeholder="https://contoh.com/gambar.jpg" value="${q.customImageUrl || ''}" oninput="teacherEditor.updateQField(${idx}, 'customImageUrl', this.value)" class="w-full p-2 rounded-lg border border-slate-400">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${[0,1,2,3,4].map(optIdx => `
+                                <div class="${optIdx === 4 ? 'sm:col-span-2' : ''}">
+                                    <label class="block font-bold text-slate-700 mb-0.5">Pilihan ${['A','B','C','D','E'][optIdx]}:</label>
+                                    <input type="text" value="${q.options[optIdx] || ''}" oninput="teacherEditor.updateQOption(${idx}, ${optIdx}, this.value)" class="w-full p-2 rounded-lg border border-slate-400">
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-start">
+                            <div>
+                                <label class="block font-bold text-emerald-800 mb-1">✅ Kunci Jawaban Benar:</label>
+                                <select onchange="teacherEditor.updateQField(${idx}, 'correct', Number(this.value))" class="w-full p-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 font-bold">
+                                    <option value="0" ${Number(q.correct) === 0 ? 'selected' : ''}>Pilihan A</option>
+                                    <option value="1" ${Number(q.correct) === 1 ? 'selected' : ''}>Pilihan B</option>
+                                    <option value="2" ${Number(q.correct) === 2 ? 'selected' : ''}>Pilihan C</option>
+                                    <option value="3" ${Number(q.correct) === 3 ? 'selected' : ''}>Pilihan D</option>
+                                    <option value="4" ${Number(q.correct) === 4 ? 'selected' : ''}>Pilihan E</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block font-bold text-slate-700 mb-1">💡 Penjelasan Singkat Jawaban:</label>
+                                <input type="text" value="${q.explanation}" oninput="teacherEditor.updateQField(${idx}, 'explanation', this.value)" class="w-full p-2 rounded-lg border border-slate-400">
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            },
+
+            renderMaterialEditorList() {
+                const container = document.getElementById('editorMaterialsContainer');
+                container.innerHTML = '';
+
+                app.materials.forEach((m, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-slate-50 border-2 border-slate-800 rounded-xl p-4 space-y-2 text-xs sm:text-sm';
+                    div.innerHTML = `
+                        <label class="font-bold text-slate-900 block">${m.icon} Judul Dunia / Sub-Materi #${idx + 1}:</label>
+                        <input type="text" value="${m.title}" oninput="app.materials[${idx}].title = this.value" class="w-full p-2 rounded-lg border border-slate-400 font-bold">
+                        <label class="font-bold text-slate-700 block pt-1">Ringkasan Materi Pembelajaran:</label>
+                        <textarea rows="3" oninput="app.materials[${idx}].summary = this.value" class="w-full p-2 rounded-lg border border-slate-400">${m.summary}</textarea>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            updateQField(qIdx, field, val) {
+                app.questions[qIdx][field] = val;
+            },
+
+            updateQOption(qIdx, optIdx, val) {
+                app.questions[qIdx].options[optIdx] = val;
+            },
+
+            saveAndClose() {
+                app.saveToStorage();
+                sound.correct();
+                app.switchScreen('screenHome');
+            },
+
+            resetDefault() {
+                app.questions = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+                app.materials = JSON.parse(JSON.stringify(DEFAULT_MATERIALS));
+                app.saveToStorage();
+                this.init();
+                sound.coin();
+            }
+        };
+
+        // Initialize Game & UI on Window Load
+        window.onload = function () {
+            app.init();
+            game.initControls();
+        };
+    </script>
+</body>
+</html>
